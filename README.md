@@ -1,10 +1,12 @@
 # Functional-Light JavaScript (book)
 
-This book explores the core principles of functional programming (FP) as they are applied to JavaScript. But what makes this book different is that we approach these principles without drowning in all the heavy terminology. We look at a subset of FP foundational concepts that I call "Functional-Light Programming" (FLP) and apply it to JavaScript.
+В этой книге рассматриваются основные принципы функционального программирования (ФП), применительно к JavaScript. Но эта книга отличается тем, что мы подходим к этим принципам, не утопая во всей этой тяжелой терминологии. Мы рассмотрим подмножество базовых концепций ФП, которое я называю «Functional-Light Programming» (FLP), и применим его к JavaScript.
 
 **Note:** Despite the word "Light" in the title, I do not consider or recommend this book as a "beginner", "easy", or "intro" book on the topic. This book is rigorous and full of gritty detail; it expects a solid foundation of JS knowledge before diving in. "Light" means limited in scope; instead of being more broad, this book goes much deeper into each topic than you typically find in other FP-JavaScript books.
 
-Let's face it: unless you're already a member of the FP cool kids club (I'm not!), a statement like, "a monad is just a monoid in the category of endofunctors", just doesn't mean anything useful to us.
+** Примечание:** Несмотря на слово «Light» в названии, я не рассматриваю и не рекомендую эту книгу в качестве «начинающей», «легкой» или «вводной» книги по этой теме. Эта книга является строгой и полной мельчайших деталей; Это подразумевает наличие прочной основы знания JS перед погружением. «Light» означает ограниченный охват; Вместо того, чтобы быть более широким, эта книга идет гораздо глубже в каждую тему, чем вы обычно находите в других книгах FP-JavaScript.
+
+Посмотрим правде в глаза: пока вы не являетесь членом крутого детского клуба ФП (я нет!), Заявление типа «монада - это просто моноид в категории эндофункторов», просто не означает для нас ничего полезного.
 
 That's not to say the terms are meaning*less* or that FPrs are bad for using them. Once you graduate from Functional-Light, you'll maybe/hopefully want to study FP more formally, and you'll certainly have plenty of exposure to what they mean and why.
 
