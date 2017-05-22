@@ -108,7 +108,7 @@ else if (fn.length == 3) {
 }
 ```
 
-**Tip:** The `length` property of a function is read-only and it's determined at the time you declare the function. It should be thought of as essentially a piece of metadata that describes something about the intended usage of the function.
+**Подсказка:** Свойство `length` у функции доступно только для чтения, и оно определяется в момент объявления функции. Его следует рассматривать по существу, как кусок метаданных, который описывает что-то о предполагаемом использовании функции.
 
 One gotcha to be aware of is that certain kinds of parameter list variations can make the `length` property of the function report something different than you might expect. Don't worry, we'll explain each of these (ES6-introduced) features later in this chapter:
 
