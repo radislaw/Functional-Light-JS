@@ -1,19 +1,20 @@
 # Functional-Light JavaScript
 # Chapter 2: Foundations of Functional Functions
 
-Functional Programming is **not just programming with the `function` keyword.** Oh if only it was that easy, I could end the book right here! But importantly, the function really *is* at the center of FP. And it's how we use functions that makes our code *functional*.
+Функциональное программирование - это не просто **программирование с помощью ключевого слова `function`.** О, если бы это было так просто, я мог бы закончить книгу прямо здесь! Но главное, функция действительно *находится* в центре FP. И именно так мы используем функции, которые делают наш код *функциональным*.
 
-But, how sure are you that you know what *function* means?
+Но насколько вы уверены, что знаете, что означает *функция*?
 
-In this chapter, we're going to lay the groundwork for the rest of the book by covering all the foundational aspects of functions. In some ways, the content here is a review of all the things even a non-FP programmer should know about functions. But if we want to get the most out learning FP concepts, we've got to *know* functions inside and out.
+В этой главе мы собираемся подготовить основу для остальной части книги, охватывая все основополагающие аспекты функций. В некотором смысле, написанное здесь - это обзор всего, что программист, не использующий FP, должен знать о функциях. Но если мы хотим получить максимальную отдачу от обучения концепциям FP, мы должны *знать* функции вдоль и поперек.
 
-Brace yourself, because there's a lot more to the function than you may have realized.
+Соберитесь, потому что функция - это гораздо большее, чем вы могли себе представить.
 
-## What Is A Function?
+## Что такое Функция?
 
-The most natural place I can think of to start tackling functional programming is with the *function*. That may seem too simplistic and obvious, but I think our journey needs a solid first step.
 
-So... what is a function?
+Наиболее естественное место, которое я могу придумать, для начала занятиями функциональным программированием, - это *функция*. Это может показаться слишком упрощенным и очевидным, но я думаю, что нашему путешествию нужен прочный первый шаг.
+
+Итак ... что такое функция?
 
 ### Brief Math Review
 
