@@ -1030,14 +1030,16 @@ doLogin(user,pw) {
 
 From my perspective, the problem is not with using objects to organize behavior. It's that we're trying to use implicit input instead of being explicit about it. When I'm wearing my FP hat, I want to leave `this` stuff on the shelf.
 
-## Summary
+## Резюме
 
-Functions are powerful.
+Функции очень мощны.
 
-But let's be clear what a function is. It's not just a collection of statements/operations. Specifically, a function needs one or more inputs (ideally, just one!) and an output.
+Но давайте четко понимать, что такое функция. Это не просто набор операторов / операций. В частности, функция требует один или несколько входов (в идеале, только один!) и выходов.
 
-Functions inside of functions can have closure over outer variables and remember them for later. This is one of the most important concepts in all of programming, and a fundamental foundation of FP.
+Функции внутри функций могут иметь замыкание над внешними переменными и запоминать их для дальнейшего использования. Это одна из самых важных концепций во всем программировании и фундаментальная основа FP.
 
 Be careful of anonymous functions, especially `=>` arrow functions. They're convenient to write, but they shift the cost from author to reader. The whole reason we're studying FP here is to write more readable code, so don't be so quick to jump on that bandwagon.
+
+Будьте осторожны с анонимными функциями, особенно с функциями стрелками `=>`. Их удобно писать, но они переносят стоимость от автора к читателю. Вся причина, по которой мы изучаем FP, состоит в том, чтобы написать более читаемый код, так что не спешите прыгать на этот поезд.
 
 Don't use `this`-aware functions. Just don't.
