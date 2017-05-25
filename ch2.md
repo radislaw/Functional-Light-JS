@@ -538,7 +538,7 @@ This implicit function output has a special name in the FP world: side effects. 
 
 ## Functions Of Functions
 
-Functions can receive and return values of any type. A function that receives or returns one or more other function values has the special name: higher-order function.
+Функции могут принимать и возвращать значения любого типа. Функция, которая получает или возвращает одно или несколько других значений функций, имеет специальное имя: функция более высокого порядка.
 
 Consider:
 
@@ -555,9 +555,9 @@ forEach( [1,2,3,4,5], function each(val){
 // 1 2 3 4 5
 ```
 
-`forEach(..)` is a higher-order function because it receives a function as an argument.
+`forEach(..)` Является функцией более высокого порядка, потому что получает функцию в качестве аргумента.
 
-A higher-order function can also output another function, like:
+Функция более высокого порядка также может выводить другую функцию, например:
 
 ```js
 function foo() {
@@ -573,7 +573,7 @@ var f = foo();
 f( "Hello!" );			// Hello!
 ```
 
-`return` is not the only way to "output" another function:
+`return` Это не единственный способ «вывести» другую функцию:
 
 ```js
 function foo() {
@@ -591,13 +591,13 @@ function bar(func) {
 foo();					// Hello!
 ```
 
-Functions that treat other functions as values are higher-order functions by definition. FPers write these all the time!
+Функции, которые рассматривают другие функции как значения, по определению являются функциями более высокого порядка. ФПшники пишут их все время!
 
-### Keeping Scope
+### Сохранение области видимости
 
-One of the most powerful things in all of programming, and especially in FP, is how a function behaves when it's inside another function's scope. When the inner function makes reference to a variable from the outer function, this is called closure.
+Одна из самых сильных вещей во всем программировании, и особенно в FP, - это то, как ведет себя функция, когда она находится внутри области видимости другой функции. Когда внутренняя функция ссылается на переменную из внешней функции, она называется замыканием.
 
-Defined pragmatically, closure is when a function remembers and accesses variables from outside of its own scope, even when that function is executed in a different scope.
+На практике, замыкание - это когда функция запоминает и получает доступ к переменным из-за пределов своей области видимости, даже когда эта функция выполняется в другой области видимости.
 
 Consider:
 
@@ -616,6 +616,8 @@ helloFn();				// Hello!
 ```
 
 The `msg` parameter variable in the scope of `foo(..)` is referenced inside the inner function. When `foo(..)` is executed and the inner function is created, it captures the access to the `msg` variable, and retains that access even after being `return`d.
+
+Переменная параметра `msg` в области видимости `foo (..)` указывается в функции inner. Когда выполняется `foo (..)` и создается внутренняя функция, он фиксирует доступ к переменной `msg` и сохраняет этот доступ даже после` return`d.
 
 Once we have `helloFn`, a reference to the inner function, `foo(..)` has finished and it would seem as if its scope should have gone away, meaning the `msg` variable would no longer exist. But that doesn't happen, because the inner function has a closure over `msg` that keeps it alive. The closed over `msg` variable survives for as long as the inner function (now referenced by `helloFn` in a different scope) stays around.
 
