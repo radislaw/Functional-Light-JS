@@ -924,11 +924,15 @@ I think most FPers are going to blink and wave off these concerns. They love ano
 
 ## What's This?
 
-If you're not familiar with the `this` binding rules in JavaScript, I recommend you check out my "You Don't Know JS: this & Object Prototypes" book. For the purposes of this section, I'll assume you know how `this` gets determined for a function call (one of the four rules). But even if you're still fuzzy on *this*, the good news is we're going to conclude that you shouldn't be using `this` if you're trying to do FP.
+But even if you're still fuzzy on *this*, the good news is we're going to conclude that you shouldn't be using `this` if you're trying to do FP.
+
+Если вы не знакомы с правилами привязки `this` в JavaScript, я рекомендую вам ознакомиться с моей книгой "You Don't Know JS: this & Object Prototypes". Для целей этого раздела я предполагаю, что вы знаете, как `this` определяется для вызова функции (одно из четырех правил). Но даже если вы все еще нечеткие *this*, хорошая новость заключается в том, что мы собираемся сделать вывод, что вы не должны использовать `this`, если вы пытаетесь заняться FP.
 
 JavaScript `function`s have a `this` keyword that's automatically bound per function call. The `this` keyword can be described in many different ways, but I prefer to say it provides an object context for the function to run against.
 
-`this` is an implicit parameter input for your function.
+У JavaScript `function` есть ключевое слово `this`, которое автоматически привязано к вызову функции. Ключевое слово `this` можно описывать по-разному, но я предпочитаю говорить, что оно предоставляет контекст объекта для функции, против которой он выполняется.
+
+`this` является скрытым входным параметром для вашей функции.
 
 Consider:
 
@@ -951,7 +955,7 @@ var s = sum.bind( context );
 s();						// 3
 ```
 
-Of course, if `this` can be input into a function implicitly, the same object context could be sent in as an explicit argument:
+Конечно, если `this` может быть введено в функцию срыто, тот же контекст объекта может быть отправлен как явный аргумент:
 
 ```js
 function sum(ctx) {
