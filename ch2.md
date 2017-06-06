@@ -20,6 +20,8 @@
 
 I know I've promised we'd stay away from math as much as possible, but bear with me for a moment as we quickly observe some fundamental things about functions and graphs from algebra before we move on.
 
+Я знаю, что я пообещал, что мы будем насколько это возможно избегать математики, но на мгновение неся со мной, когда мы быстро наблюдаем некоторые фундаментальные вещи о функциях и графах из алгебры, прежде чем двигаться дальше.
+
 Do you remember learning anything about `f(x)` back in school? What about the equation `y = f(x)`?
 
 Let's say an equation is defined like this: <code>f(x) = 2x<sup>2</sup> + 3</code>. What does that mean? What does it mean to graph that equation? Here's the graph:
