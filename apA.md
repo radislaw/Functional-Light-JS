@@ -1,7 +1,7 @@
 # Functional-Light JavaScript
 # Appendix A: Transducing
 
-Transducing is a more advanced technique than we've covered in this book. It extends many of the concepts from Chapter 8 on list operations.
+Transducing is a more advanced technique than we've covered in this book. It extends many of the concepts from Chapter 9 on list operations.
 
 I wouldn't necessarily call this topic strictly "Functional-Light", but more like a bonus on top. I've left this to an appendix because you might very well need to skip the discussion for now and come back to it once you feel fairly comfortable with -- and make sure you've practiced! -- the main book concepts.
 
@@ -19,15 +19,15 @@ Let's start by extending a scenario we covered back in Chapter 3, testing words 
 
 ```js
 function isLongEnough(str) {
-	return str.length >= 5;
+    return str.length >= 5;
 }
 
 function isShortEnough(str) {
-	return str.length <= 10;
+    return str.length <= 10;
 }
 ```
 
-In Chapter 3, we used these predicate functions to test a single word. Then in Chapter 8, we learned how to repeat such tests using list operations like `filter(..)`. For example:
+In Chapter 3, we used these predicate functions to test a single word. Then in Chapter 9, we learned how to repeat such tests using list operations like `filter(..)`. For example:
 
 ```js
 var words = [ "You", "have", "written", "something", "very", "interesting" ];
@@ -40,17 +40,17 @@ words
 
 It may not be obvious, but this pattern of separate adjacent list operations has some non-ideal characteristics. When we're dealing with only a single array of a small number of values, everything is fine. But if there were lots of values in the array, each `filter(..)` processing the list separately can slow down a bit more than we'd like.
 
-A similar performance problem arises when our arrays are async/lazy (aka observables), processing values over time in response to events (see Chapter 10). In this scenario, only a single value comes down the event stream at a time, so processing that discrete value with two separate `filter(..)`s function calls isn't really such a big deal.
+A similar performance problem arises when our arrays are async/lazy (aka Observables), processing values over time in response to events (see Chapter 10). In this scenario, only a single value comes down the event stream at a time, so processing that discrete value with two separate `filter(..)`s function calls isn't really such a big deal.
 
 But, what's not obvious is that each `filter(..)` method produces a separate observable. The overhead of pumping a value out of one observable into another can really add up. That's especially true since in these cases, it's not uncommon for thousands or millions of values to be processed; even such small overhead costs add up quickly.
 
-The other downside is readability, especially when we need to repeat the same series of operations against multiple lists (or observables). For example:
+The other downside is readability, especially when we need to repeat the same series of operations against multiple lists (or Observables). For example:
 
 ```js
 zip(
-	list1.filter( isLongEnough ).filter( isShortEnough ),
-	list2.filter( isLongEnough ).filter( isShortEnough ),
-	list3.filter( isLongEnough ).filter( isShortEnough )
+    list1.filter( isLongEnough ).filter( isShortEnough ),
+    list2.filter( isLongEnough ).filter( isShortEnough ),
+    list3.filter( isLongEnough ).filter( isShortEnough )
 )
 ```
 
@@ -60,18 +60,18 @@ Wouldn't it be better (both for readability and performance) if we could combine
 
 ```js
 function isCorrectLength(str) {
-	return isLongEnough( str ) && isShortEnough( str );
+    return isLongEnough( str ) && isShortEnough( str );
 }
 ```
 
 But that's not the FP way!
 
-In Chapter 8, we talked about fusion -- composing adjacent mapping functions. Recall:
+In Chapter 9, we talked about fusion -- composing adjacent mapping functions. Recall:
 
 ```js
 words
 .map(
-	pipe( removeInvalidChars, upper, elide )
+    pipe( removeInvalidChars, upper, elide )
 );
 ```
 
@@ -108,25 +108,25 @@ Let's jump in.
 
 ### Expressing Map/Filter As Reduce
 
-The first trick we need to perform is expressing our `filter(..)` and `map(..)` calls as `reduce(..)` calls. Recall how we did that in Chapter 8:
+The first trick we need to perform is expressing our `filter(..)` and `map(..)` calls as `reduce(..)` calls. Recall how we did that in Chapter 9:
 
 ```js
 function strUppercase(str) { return str.toUpperCase(); }
 function strConcat(str1,str2) { return str1 + str2; }
 
 function strUppercaseReducer(list,str) {
-	list.push( strUppercase( str ) );
-	return list;
+    list.push( strUppercase( str ) );
+    return list;
 }
 
 function isLongEnoughReducer(list,str) {
-	if (isLongEnough( str )) list.push( str );
-	return list;
+    if (isLongEnough( str )) list.push( str );
+    return list;
 }
 
 function isShortEnoughReducer(list,str) {
-	if (isShortEnough( str )) list.push( str );
-	return list;
+    if (isShortEnough( str )) list.push( str );
+    return list;
 }
 
 words
@@ -139,25 +139,25 @@ words
 
 That's a decent improvement. We now have four adjacent `reduce(..)` calls instead of a mixture of three different methods all with different shapes. We still can't just `compose(..)` those four reducers, however, because they accept two arguments instead of one.
 
-In Chapter 8, we sort of cheated and used `list.push(..)` to mutate as a side effect rather than calling `list.concat(..)` to return a whole new array. Let's be a bit more formal for now:
+In Chapter 9, we sort of cheated and used `list.push(..)` to mutate as a side effect rather than creating a whole new array to concatenate onto. Let's step back and be a bit more formal for now:
 
 ```js
 function strUppercaseReducer(list,str) {
-	return list.concat( [strUppercase( str )] );
+    return [ ...list, strUppercase( str ) ];
 }
 
 function isLongEnoughReducer(list,str) {
-	if (isLongEnough( str )) return list.concat( [str] );
-	return list;
+    if (isLongEnough( str )) return [ ...list, str ];
+    return list;
 }
 
 function isShortEnoughReducer(list,str) {
-	if (isShortEnough( str )) return list.concat( [str] );
-	return list;
+    if (isShortEnough( str )) return [ ...list, str ];
+    return list;
 }
 ```
 
-Later, we'll look at whether `concat(..)` is necessary here or not.
+Later, we'll revisit whether creating a new array to concatenate onto (e.g., `[...list,str]`) is necessary here or not.
 
 ### Parameterizing The Reducers
 
@@ -165,10 +165,10 @@ Both filter reducers are almost identical, except they use a different predicate
 
 ```js
 function filterReducer(predicateFn) {
-	return function reducer(list,val){
-		if (predicateFn( val )) return list.concat( [val] );
-		return list;
-	};
+    return function reducer(list,val){
+        if (predicateFn( val )) return [ ...list, val ];
+        return list;
+    };
 }
 
 var isLongEnoughReducer = filterReducer( isLongEnough );
@@ -179,9 +179,9 @@ Let's do the same parameterization of the `mapperFn(..)` for a utility to produc
 
 ```js
 function mapReducer(mapperFn) {
-	return function reducer(list,val){
-		return list.concat( [mapperFn( val )] );
-	};
+    return function reducer(list,val){
+        return [ ...list, mapperFn( val ) ];
+    };
 }
 
 var strToUppercaseReducer = mapReducer( strUppercase );
@@ -204,7 +204,7 @@ Look very closely at the above `mapReducer(..)` and `filterReducer(..)` function
 This part:
 
 ```js
-return list.concat( .. );
+return [ ...list, .. ];
 
 // or
 return list;
@@ -214,15 +214,15 @@ Let's define a helper for that common logic. But what shall we call it?
 
 ```js
 function WHATSITCALLED(list,val) {
-	return list.concat( [val] );
+    return [ ...list, val ];
 }
 ```
 
-If you examine what that `WHATSITCALLED(..)` function does, it takes two values (an array and another value) and it "combines" them by concatenating the value onto the end of the array, returning a new array. Very uncreatively, we could name this `listCombination(..)`:
+If you examine what that `WHATSITCALLED(..)` function does, it takes two values (an array and another value) and it "combines" them by creating a new array and concatenating the value onto the end of it. Very uncreatively, we could name this `listCombination(..)`:
 
 ```js
 function listCombination(list,val) {
-	return list.concat( [val] );
+    return [ ...list, val ];
 }
 ```
 
@@ -230,16 +230,16 @@ Let's now re-define our reducer helpers to use `listCombination(..)`:
 
 ```js
 function mapReducer(mapperFn) {
-	return function reducer(list,val){
-		return listCombination( list, mapperFn( val ) );
-	};
+    return function reducer(list,val){
+        return listCombination( list, mapperFn( val ) );
+    };
 }
 
 function filterReducer(predicateFn) {
-	return function reducer(list,val){
-		if (predicateFn( val )) return listCombination( list, val );
-		return list;
-	};
+    return function reducer(list,val){
+        if (predicateFn( val )) return listCombination( list, val );
+        return list;
+    };
 }
 ```
 
@@ -251,16 +251,16 @@ Our simple `listCombination(..)` utility is only one possible way that we might 
 
 ```js
 function mapReducer(mapperFn,combinationFn) {
-	return function reducer(list,val){
-		return combinationFn( list, mapperFn( val ) );
-	};
+    return function reducer(list,val){
+        return combinationFn( list, mapperFn( val ) );
+    };
 }
 
 function filterReducer(predicateFn,combinationFn) {
-	return function reducer(list,val){
-		if (predicateFn( val )) return combinationFn( list, val );
-		return list;
-	};
+    return function reducer(list,val){
+        if (predicateFn( val )) return combinationFn( list, val );
+        return list;
+    };
 }
 ```
 
@@ -276,24 +276,24 @@ Defining these utilities to take two arguments instead of one is less convenient
 
 ```js
 var curriedMapReducer = curry( function mapReducer(mapperFn,combinationFn){
-	return function reducer(list,val){
-		return combinationFn( list, mapperFn( val ) );
-	};
+    return function reducer(list,val){
+        return combinationFn( list, mapperFn( val ) );
+    };
 } );
 
 var curriedFilterReducer = curry( function filterReducer(predicateFn,combinationFn){
-	return function reducer(list,val){
-		if (predicateFn( val )) return combinationFn( list, val );
-		return list;
-	};
+    return function reducer(list,val){
+        if (predicateFn( val )) return combinationFn( list, val );
+        return list;
+    };
 } );
 
 var strToUppercaseReducer =
-	curriedMapReducer( strUppercase )( listCombination );
+    curriedMapReducer( strUppercase )( listCombination );
 var isLongEnoughReducer =
-	curriedFilterReducer( isLongEnough )( listCombination );
+    curriedFilterReducer( isLongEnough )( listCombination );
 var isShortEnoughReducer =
-	curriedFilterReducer( isShortEnough )( listCombination );
+    curriedFilterReducer( isShortEnough )( listCombination );
 ```
 
 That looks a bit more verbose, and probably doesn't seem very useful.
@@ -322,12 +322,12 @@ var longEnoughReducer = y( listCombination );
 var shortEnoughReducer = z( listCombination );
 ```
 
-But what would you get back if you called `y(z)`? Basically, what happens when passing `z` in as the `combinationFn(..)` for the `y(..)` call? That returned reducer function internally looks kinda like this:
+But what would you get back if you called `y(z)`, instead of `y(listCombination)`? Basically, what happens when passing `z` in as the `combinationFn(..)` for the `y(..)` call? That returned reducer function internally looks kinda like this:
 
 ```js
 function reducer(list,val) {
-	if (isLongEnough( val )) return z( list, val );
-	return list;
+    if (isLongEnough( val )) return z( list, val );
+    return list;
 }
 ```
 
@@ -340,27 +340,27 @@ var shortEnoughReducer = z( listCombination );
 var longAndShortEnoughReducer = y( shortEnoughReducer );
 ```
 
-We create `shortEnoughReducer(..)`, then we pass *it* in as the `combinationFn(..)` to `y(..)`, producing `longAndShortEnoughReducer(..)`. Re-read that a few times until it clicks.
+We create `shortEnoughReducer(..)`, then we pass *it* in as the `combinationFn(..)` to `y(..)` instead of calling `y(listCombination)`; this new call produces `longAndShortEnoughReducer(..)`. Re-read that a few times until it clicks.
 
 Now consider: what do `shortEnoughReducer(..)` and `longAndShortEnoughReducer(..)` look like internally? Can you see them in your mind?
 
 ```js
-// shortEnoughReducer, from z(..):
+// shortEnoughReducer, from calling z(..):
 function reducer(list,val) {
-	if (isShortEnough( val )) return listCombination( list, val );
-	return list;
+    if (isShortEnough( val )) return listCombination( list, val );
+    return list;
 }
 
-// longAndShortEnoughReducer, from y(..):
+// longAndShortEnoughReducer, from calling y(..):
 function reducer(list,val) {
-	if (isLongEnough( val )) return shortEnoughReducer( list, val );
-	return list;
+    if (isLongEnough( val )) return shortEnoughReducer( list, val );
+    return list;
 }
 ```
 
 Do you see how `shortEnoughReducer(..)` has taken the place of `listCombination(..)` inside `longAndShortEnoughReducer(..)`? Why does that work?
 
-Because **the shape of a `reducer(..)` and the shape of `listCombination(..)` are the same.** In other words, a reducer can be used as a combination function for another reducer; that's how they compose! The `listCombination(..)` function makes the first reducer, then *that reducer* can be as the combination function to make the next reducer, and so on.
+Because **the shape of a `reducer(..)` and the shape of `listCombination(..)` are the same.** In other words, a reducer can be used as a combination function for another reducer; that's how they compose! The `listCombination(..)` function makes the first reducer, then *that reducer* can be used as the combination function to make the next reducer, and so on.
 
 Let's test out our `longAndShortEnoughReducer(..)` with a few different values:
 
@@ -391,7 +391,7 @@ As the name `upperLongAndShortEnoughReducer(..)` implies, it does all three step
 ```js
 // upperLongAndShortEnoughReducer:
 function reducer(list,val) {
-	return longAndShortEnoughReducer( list, strUppercase( val ) );
+    return longAndShortEnoughReducer( list, strUppercase( val ) );
 }
 ```
 
@@ -433,9 +433,9 @@ That's pretty cool. But let's make it even better.
 
 ```js
 var composition = compose(
-	curriedMapReducer( strUppercase ),
-	curriedFilterReducer( isLongEnough ),
-	curriedFilterReducer( isShortEnough )
+    curriedMapReducer( strUppercase ),
+    curriedFilterReducer( isLongEnough ),
+    curriedFilterReducer( isShortEnough )
 );
 
 var upperLongAndShortEnoughReducer = composition( listCombination );
@@ -450,15 +450,13 @@ Think about the flow of "data" in that composed function:
 2. *That* resulting reducer function then flows in as the combination function to make the filter-reducer for `isLongEnough(..)`.
 3. Finally, *that* resulting reducer function flows in as the combination function to make the map-reducer for `strUppercase(..)`.
 
-In the previous snippet, `composition(..)` is a composed function expecting a combination function to make a reducer; `composition(..)` has a special label: transducer. Providing the combination function to a transducer produces the composed reducer:
-
-// TODO: fact-check if the transducer *produces* the reducer or *is* the reducer
+In the previous snippet, `composition(..)` is a composed function expecting a combination function to make a reducer; `composition(..)` here has a special name: transducer. Providing the combination function to a transducer produces the composed reducer:
 
 ```js
 var transducer = compose(
-	curriedMapReducer( strUppercase ),
-	curriedFilterReducer( isLongEnough ),
-	curriedFilterReducer( isShortEnough )
+    curriedMapReducer( strUppercase ),
+    curriedFilterReducer( isLongEnough ),
+    curriedFilterReducer( isShortEnough )
 );
 
 words
@@ -474,18 +472,18 @@ As a quick aside, let's revisit our `listCombination(..)` combination function i
 
 ```js
 function listCombination(list,val) {
-	return list.concat( [val] );
+    return [ ...list, val ];
 }
 ```
 
-While this approach is pure, it has negative consequences for performance. First, it creates the `[..]` temporary array wrapped around `val`. Then, `concat(..)` creates a whole new array to append this temporary array onto. For each step in our composed reduction, that's a lot of arrays being created and thrown away, which is not only bad for CPU but also GC memory churn.
+While this approach is pure, it has negative consequences for performance: for each step in the reduction, we're creating a whole new array to append the value onto, effectively throwing away the previous array. That's a lot of arrays being created and thrown away, which is not only bad for CPU but also GC memory churn.
 
-The better-performing, impure version:
+By contrast, look again at the better-performing but impure version:
 
 ```js
 function listCombination(list,val) {
-	list.push( val );
-	return list;
+    list.push( val );
+    return list;
 }
 ```
 
@@ -512,7 +510,7 @@ words
 
 That's pretty good, but we have one final trick up our sleeve with transducing. And frankly, I think this part is what makes all this mental effort you've expended thus far, actually worth it.
 
-Can we somehow "compose" these two `reduce(..)` calls to get it down to just one `reduce(..)`? Unfortunately, we can't just add `strConcat(..)` into the `compose(..)` call; its shape is not correct for that kind of composition.
+Can we somehow "compose" these two `reduce(..)` calls to get it down to just one `reduce(..)`? Unfortunately, we can't just add `strConcat(..)` into the `compose(..)` call; since its a reducer and not a combination-expecting function, its shape is not correct for the composition.
 
 But let's look at these two functions side-by-side:
 
@@ -545,16 +543,16 @@ Recall the helpers we defined earlier; let's rename them for clarity:
 
 ```js
 var transduceMap = curry( function mapReducer(mapperFn,combinationFn){
-	return function reducer(list,v){
-		return combinationFn( list, mapperFn( v ) );
-	};
+    return function reducer(list,v){
+        return combinationFn( list, mapperFn( v ) );
+    };
 } );
 
 var transduceFilter = curry( function filterReducer(predicateFn,combinationFn){
-	return function reducer(list,v){
-		if (predicateFn( v )) return combinationFn( list, v );
-		return list;
-	};
+    return function reducer(list,v){
+        if (predicateFn( v )) return combinationFn( list, v );
+        return list;
+    };
 } );
 ```
 
@@ -562,9 +560,9 @@ Also recall that we use them like this:
 
 ```js
 var transducer = compose(
-	transduceMap( strUppercase ),
-	transduceFilter( isLongEnough ),
-	transduceFilter( isShortEnough )
+    transduceMap( strUppercase ),
+    transduceFilter( isLongEnough ),
+    transduceFilter( isShortEnough )
 );
 ```
 
@@ -574,8 +572,8 @@ But to express all these transducing steps more declaratively, let's make a `tra
 
 ```js
 function transduce(transducer,combinationFn,initialValue,list) {
-	var reducer = transducer( combinationFn );
-	return list.reduce( reducer, initialValue );
+    var reducer = transducer( combinationFn );
+    return list.reduce( reducer, initialValue );
 }
 ```
 
@@ -583,9 +581,9 @@ Here's our running example, cleaned up:
 
 ```js
 var transducer = compose(
-	transduceMap( strUppercase ),
-	transduceFilter( isLongEnough ),
-	transduceFilter( isShortEnough )
+    transduceMap( strUppercase ),
+    transduceFilter( isLongEnough ),
+    transduceFilter( isShortEnough )
 );
 
 transduce( transducer, listCombination, [], words );
@@ -603,9 +601,9 @@ Finally, let's illustrate our running example using the `transducers-js` library
 
 ```js
 var transformer = transducers.comp(
-	transducers.map( strUppercase ),
-	transducers.filter( isLongEnough ),
-	transducers.filter( isShortEnough )
+    transducers.map( strUppercase ),
+    transducers.filter( isLongEnough ),
+    transducers.filter( isShortEnough )
 );
 
 transducers.transduce( transformer, listCombination, [], words );
@@ -623,12 +621,12 @@ The composed function in this snippet is named `transformer` instead of `transdu
 
 `transducers.map(..)` and `transducers.filter(..)` are special helpers that adapt regular predicate or mapper functions into functions that produce a special transform object (with the transducer function wrapped underneath); the library uses these transform objects for transducing. The extra capabilities of this transform object abstraction are beyond what we'll explore, so consult the library's documentation for more information.
 
-Since calling `transformer(..)` produces a transform object and not a typical two-arity transduce-reducer function, the library also provides `toFn(..)` to adapt the transform object to be useable by native array `reduce(..)`:
+Since calling `transformer(..)` produces a transform object and not a typical binary transduce-reducer function, the library also provides `toFn(..)` to adapt the transform object to be useable by native array `reduce(..)`:
 
 ```js
 words.reduce(
-	transducers.toFn( transformer, strConcat ),
-	""
+    transducers.toFn( transformer, strConcat ),
+    ""
 );
 // WRITTENSOMETHING
 ```
@@ -653,6 +651,6 @@ To transduce means to transform with a reduce. More specifically, a transducer i
 
 We use transducing to compose adjacent `map(..)`, `filter(..)`, and `reduce(..)` operations together. We accomplish this by first expressing `map(..)`s and `filter(..)`s as `reduce(..)`s, and then abstracting out the common combination operation to create unary reducer-producing functions that are easily composed.
 
-Transducing primarily improves performance, which is especially obvious if used on a lazy sequence (async observable).
+Transducing primarily improves performance, which is especially obvious if used on an observable.
 
-But more broadly, transducing is how we express a more declarative composition of functions that would otherwise not be directly composable. The result, if used appropriately as with all other techniques in this book, is clearer, more readable code! A single `reduce(..)` call with a transducer is easier to reason about than tracking multiple `reduce(..)` calls.
+But more broadly, transducing is how we express a more declarative composition of functions that would otherwise not be directly composable. The result, if used appropriately as with all other techniques in this book, is clearer, more readable code! A single `reduce(..)` call with a transducer is easier to reason about than tracing through multiple `reduce(..)` calls.

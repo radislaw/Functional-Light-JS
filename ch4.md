@@ -11,6 +11,8 @@ So now you've come up with a new "piece", a combination of two other pieces, and
 
 Functions come in a variety of shapes and sizes. And we can define a certain combination of them to make a new compound function that will be handy in various parts of the program. This process of using functions together is called composition.
 
+Composition is how an FPer models the flow of data through the program. In some senses, it's the most foundational concept in all of FP, because without it, you can't declaratively model data and state changes. In other words, everything else in FP would collapse without composition.
+
 ## Output To Input
 
 We've already seen a few examples of composition. For example, in Chapter 3 our discussion of `unary(..)` included this expression: `unary(adder(3))`. Think about what's happening there.
@@ -25,37 +27,41 @@ functionValue <-- unary <-- adder <-- 3
 
 `3` is the input to `adder(..)`. The output of `adder(..)` is the input to `unary(..)`. The output of `unary(..)` is `functionValue`. This is the composition of `unary(..)` and `adder(..)`.
 
+**Note:** The right-to-left orientation here is on purpose, though it may seem strange at this point in your learning. We'll come back to explain that more fully later.
+
 Think of this flow of data like a conveyor belt in a candy factory, where each operation is a step in the process of cooling, cutting, and wrapping a piece of candy. We'll use the candy factory metaphor throughout this chapter to explain what composition is.
 
 <p align="center">
-	<img src="fig2.png">
+    <img src="fig2.png">
 </p>
 
 Let's examine composition in action one step at a time. Consider these two utilitites you might have in your program:
 
 ```js
 function words(str) {
-	return String( str )
-		.toLowerCase()
-		.split( /\s|\b/ )
-		.filter( function alpha(v){
-			return /^[\w]+$/.test( v );
-		} );
+    return String( str )
+        .toLowerCase()
+        .split( /\s|\b/ )
+        .filter( function alpha(v){
+            return /^[\w]+$/.test( v );
+        } );
 }
 
 function unique(list) {
-	var uniqList = [];
+    var uniqList = [];
 
-	for (let i = 0; i < list.length; i++) {
-		// value not yet in the new list?
-		if (uniqList.indexOf( list[i] ) === -1 ) {
-			uniqList.push( list[i] );
-		}
-	}
+    for (let v of list) {
+        // value not yet in the new list?
+        if (uniqList.indexOf( v ) === -1 ) {
+            uniqList.push( v );
+        }
+    }
 
-	return uniqList;
+    return uniqList;
 }
 ```
+
+`words(..)` splits of a string into an array of words. `unique(..)` takes a list of words and filters it to not have any repeat words in it.
 
 To use these two utilities to analyze a string of text:
 
@@ -105,7 +111,7 @@ Relating back to the code: we now realize that the pairing of `words(..)` and `u
 
 ```js
 function uniqueWords(str) {
-	return unique( words( str ) );
+    return unique( words( str ) );
 }
 ```
 
@@ -126,32 +132,34 @@ But the factory engineers struggle to keep up, because each time a new kind of f
 So the factory engineers contact an industrial machine vendor for help. They're amazed to find out that this vendor offers a **machine-making** machine! As incredible as it sounds, they purchase a machine that can take a couple of the factory's smaller machines -- the chocolate cooling one and the cutting one, for example -- and wire them together automatically, even wrapping a nice clean bigger box around them. This is surely going to make the candy factory really take off!
 
 <p align="center">
-	<img src="fig5.png" width="300">
+    <img src="fig5.png" width="300">
 </p>
 
 Back to code land, let's consider a utility called `compose2(..)` that creates a composition of two functions automatically, exactly the same way we did manually:
 
 ```js
 function compose2(fn2,fn1) {
-	return function composed(origValue){
-		return fn2( fn1( origValue ) );
-	};
+    return function composed(origValue){
+        return fn2( fn1( origValue ) );
+    };
 }
 
 // or the ES6 => form
 var compose2 =
-	(fn2,fn1) =>
-		origValue =>
-			fn2( fn1( origValue ) );
+    (fn2,fn1) =>
+        origValue =>
+            fn2( fn1( origValue ) );
 ```
 
 Did you notice that we defined the parameter order as `fn2,fn1`, and furthermore that it's the second function listed (aka `fn1` parameter name) that runs first, then the first function listed (`fn2`)? In other words, the functions compose from right-to-left.
 
 That may seem like a strange choice, but there are some reasons for it. Most typical FP libraries define their `compose(..)` to work right-to-left in terms of ordering, so we're sticking with that convention.
 
-But why? I think the easiest explanation (but perhaps not the most historically accurate) is that we're listing them to match the order they are written if done manually, or rather the order we encounter them when reading from left-to-right.
+But why? I think the easiest explanation (but perhaps not the most historically accurate) is that we're listing them to match the order they are written in code manually, or rather the order we encounter them when reading from left-to-right.
 
-`unique(words(str))` lists the functions in the left-to-right order `unique, words`, so we make our `compose2(..)` utility accept them in that order, too. Now, the more efficient definition of the candy making machine is:
+`unique(words(str))` lists the functions in the left-to-right order `unique, words`, so we make our `compose2(..)` utility accept them in that order, too. The execution order is right-to-left, but the code order is left-to-right. Pay close attention to keep those distinct in your mind.
+
+Now, the more efficient definition of the candy making machine is:
 
 ```js
 var uniqueWords = compose2( unique, words );
@@ -175,7 +183,7 @@ Admittedly, this is a contrived example. But the point is that function composit
 
 The candy factory better be careful if they try to feed the wrapped candies into the machine that mixes and cools the chocolate!
 
-### General Composition
+## General Composition
 
 If we can define the composition of two functions, we can just keep going to support composing any number of functions. The general data visualization flow for any number of functions being composed looks like this:
 
@@ -184,7 +192,7 @@ finalValue <-- func1 <-- func2 <-- ... <-- funcN <-- origValue
 ```
 
 <p align="center">
-	<img src="fig6.png" width="300">
+    <img src="fig6.png" width="300">
 </p>
 
 Now the candy factory owns the best machine of all: a machine that can take any number of separate smaller machines and spit out a big fancy machine that does every step in order. That's one heck of a candy operation! It's Willy Wonka's dream!
@@ -193,49 +201,51 @@ We can implement a general `compose(..)` utility like this:
 
 ```js
 function compose(...fns) {
-	return function composed(result){
-		// copy the array of functions
-		var list = fns.slice();
+    return function composed(result){
+        // copy the array of functions
+        var list = fns.slice();
 
-		while (list.length > 0) {
-			// take the last function off the end of the list
-			// and execute it
-			result = list.pop()( result );
-		}
+        while (list.length > 0) {
+            // take the last function off the end of the list
+            // and execute it
+            result = list.pop()( result );
+        }
 
-		return result;
-	};
+        return result;
+    };
 }
 
 // or the ES6 => form
 var compose =
-	(...fns) =>
-		result => {
-			var list = fns.slice();
+    (...fns) =>
+        result => {
+            var list = fns.slice();
 
-			while (list.length > 0) {
-				// take the last function off the end of the list
-				// and execute it
-				result = list.pop()( result );
-			}
+            while (list.length > 0) {
+                // take the last function off the end of the list
+                // and execute it
+                result = list.pop()( result );
+            }
 
-			return result;
-		};
+            return result;
+        };
 ```
+
+**Warning:** `...fns` is a collected array of arguments, not a passed-in array, and as such, it's local to `compose(..)`. It may be tempting to think the `fns.slice()` would thus be unnecessary. However, in this particular implementation, `.pop()` inside the inner `composed(..)` function is mutating the list, so if we didn't make a copy each time, the returned composed function could only be used reliably once. We'll revisit this hazard in Chapter 6.
 
 Now let's look at an example of composing more than two functions. Recalling our `uniqueWords(..)` composition example, let's add a `skipShortWords(..)` to the mix:
 
 ```js
-function skipShortWords(list) {
-	var filteredList = [];
+function skipShortWords(words) {
+    var filteredWords = [];
 
-	for (let i = 0; i < list.length; i++) {
-		if (list[i].length > 4) {
-			filteredList.push( list[i] );
-		}
-	}
+    for (let word of words) {
+        if (word.length > 4) {
+            filteredWords.push( word );
+        }
+    }
 
-	return filteredList;
+    return filteredWords;
 }
 ```
 
@@ -297,21 +307,21 @@ The original version of `compose(..)` uses a loop and eagerly (aka, immediately)
 
 ```js
 function compose(...fns) {
-	return function composed(result){
-		return fns.reverse().reduce( function reducer(result,fn){
-			return fn( result );
-		}, result );
-	};
+    return function composed(result){
+        return fns.reverse().reduce( function reducer(result,fn){
+            return fn( result );
+        }, result );
+    };
 }
 
 // or the ES6 => form
 var compose = (...fns) =>
-	result =>
-		fns.reverse().reduce(
-			(result,fn) =>
-				fn( result )
-			, result
-		);
+    result =>
+        fns.reverse().reduce(
+            (result,fn) =>
+                fn( result )
+            , result
+        );
 ```
 
 Notice that the `reduce(..)` looping happens each time the final `composed(..)` function is run, and that each intermediate `result(..)` is passed along to the next iteration as the input to the next call.
@@ -324,20 +334,20 @@ To fix that first call single-argument limitation, we can still use `reduce(..)`
 
 ```js
 function compose(...fns) {
-	return fns.reverse().reduce( function reducer(fn1,fn2){
-		return function composed(...args){
-			return fn2( fn1( ...args ) );
-		};
-	} );
+    return fns.reverse().reduce( function reducer(fn1,fn2){
+        return function composed(...args){
+            return fn2( fn1( ...args ) );
+        };
+    } );
 }
 
 // or the ES6 => form
 var compose =
-	(...fns) =>
-		fns.reverse().reduce( (fn1,fn2) =>
-			(...args) =>
-				fn2( fn1( ...args ) )
-		);
+    (...fns) =>
+        fns.reverse().reduce( (fn1,fn2) =>
+            (...args) =>
+                fn2( fn1( ...args ) )
+        );
 ```
 
 Notice that we return the result of the `reduce(..)` call directly, which is itself a function, not a computed result. *That* function lets us pass in as many arguments as we want, passing them all down the line to the first function call in the composition, then bubbling up each result through each subsequent call.
@@ -356,38 +366,38 @@ We could also define `compose(..)` using recursion. The recursive definition for
 compose( compose(fn1,fn2, .. fnN-1), fnN );
 ```
 
-**Note:** We will cover recursion in deep detail in Chapter 9, so if this approach seems confusing, feel free to skip it for now and come back later after reading that chapter.
+**Note:** We will cover recursion in deep detail in Chapter 8, so if this approach seems confusing, feel free to skip it for now and come back later after reading that chapter.
 
-Here's how we implement	`compose(..)` with recursion:
+Here's how we implement `compose(..)` with recursion:
 
 ```js
 function compose(...fns) {
-	// pull off the last two arguments
-	var [ fn1, fn2, ...rest ] = fns.reverse();
+    // pull off the last two arguments
+    var [ fn1, fn2, ...rest ] = fns.reverse();
 
-	var composedFn = function composed(...args){
-		return fn2( fn1( ...args ) );
-	};
+    var composedFn = function composed(...args){
+        return fn2( fn1( ...args ) );
+    };
 
-	if (rest.length == 0) return composedFn;
+    if (rest.length == 0) return composedFn;
 
-	return compose( ...rest.reverse(), composedFn );
+    return compose( ...rest.reverse(), composedFn );
 }
 
 // or the ES6 => form
 var compose =
-	(...fns) => {
-		// pull off the last two arguments
-		var [ fn1, fn2, ...rest ] = fns.reverse();
+    (...fns) => {
+        // pull off the last two arguments
+        var [ fn1, fn2, ...rest ] = fns.reverse();
 
-		var composedFn =
-			(...args) =>
-				fn2( fn1( ...args ) );
+        var composedFn =
+            (...args) =>
+                fn2( fn1( ...args ) );
 
-		if (rest.length == 0) return composedFn;
+        if (rest.length == 0) return composedFn;
 
-		return compose( ...rest.reverse(), composedFn );
-	};
+        return compose( ...rest.reverse(), composedFn );
+    };
 ```
 
 I think the benefit of a recursive implementation is mostly conceptual. I personally find it much easier to think about a repetitive action in recursive terms instead of in a loop where I have to track the running result, so I prefer the code to express it that way.
@@ -406,17 +416,17 @@ The reverse ordering, composing from left-to-right, has a common name: `pipe(..)
 
 ```js
 function pipe(...fns) {
-	return function piped(result){
-		var list = fns.slice();
+    return function piped(result){
+        var list = fns.slice();
 
-		while (list.length > 0) {
-			// take the first function from the list
-			// and execute it
-			result = list.shift()( result );
-		}
+        while (list.length > 0) {
+            // take the first function from the list
+            // and execute it
+            result = list.shift()( result );
+        }
 
-		return result;
-	};
+        return result;
+    };
 }
 ```
 
@@ -454,29 +464,29 @@ var filterWords = partialRight( compose, unique, words );
 var filterWords = partial( pipe, words, unique );
 ```
 
-As you may recall from `partialRight(..)`'s definition in Chapter 3, it uses `reverseArgs(..)` under the covers, just as our `pipe(..)` now does. So we get the same result either way.
+As you may recall from our first implementation of `partialRight(..)` in Chapter 3, it uses `reverseArgs(..)` under the covers, just as our `pipe(..)` now does. So we get the same result either way.
 
-The slight performance advantage to `pipe(..)` in this specific case is that since we're not trying to preserve the right-to-left argument order of `compose(..)` by doing a right-partial application, using `pipe(..)` we don't need to reverse the argument order back, like we do inside `partialRight(..)`. So `partial(pipe, ..)` is a little better here than `partialRight(compose, ..)`.
-
-In general, `pipe(..)` and `compose(..)` will not have any significant performance differences when using a well-established FP library.
+*In this specific case*, the slight performance advantage to using `pipe(..)` is, since we're not trying to preserve the right-to-left argument order of `compose(..)`, we don't need to reverse the argument order back, like we do inside `partialRight(..)`. So `partial(pipe, ..)` is a little more efficient here than `partialRight(compose, ..)`.
 
 ## Abstraction
 
-Abstraction is often defined as pulling out the generality between two or more tasks. The general part is defined once, so as to avoid repetition. To perform each task's specialization, the general part is parameterized.
+Abstraction plays heavily into our reasoning about composition, so let's examine it in more detail.
+
+Similar to how partial application and currying (see Chapter 3) allow a progression from generalized to specialized functions, we can abstract by pulling out the generality between two or more tasks. The general part is defined once, so as to avoid repetition. To perform each task's specialization, the general part is parameterized.
 
 For example, consider this (obviously contrived) code:
 
 ```js
 function saveComment(txt) {
-	if (txt != "") {
-		comments[comments.length] = txt;
-	}
+    if (txt != "") {
+        comments[comments.length] = txt;
+    }
 }
 
 function trackEvent(evt) {
-	if (evt.name !== undefined) {
-		events[evt.name] = evt;
-	}
+    if (evt.name !== undefined) {
+        events[evt.name] = evt;
+    }
 }
 ```
 
@@ -486,19 +496,19 @@ So let's abstract:
 
 ```js
 function storeData(store,location,value) {
-	store[location] = value;
+    store[location] = value;
 }
 
 function saveComment(txt) {
-	if (txt != "") {
-		storeData( comments, comments.length, txt );
-	}
+    if (txt != "") {
+        storeData( comments, comments.length, txt );
+    }
 }
 
 function trackEvent(evt) {
-	if (evt.name !== undefined) {
-		storeData( events, evt.name, evt );
-	}
+    if (evt.name !== undefined) {
+        storeData( events, evt.name, evt );
+    }
 }
 ```
 
@@ -506,15 +516,15 @@ The general task of referencing a property on an object (or array, thanks to JS'
 
 If we repeat the common general behavior in multiple places, we run the maintenance risk of changing some instances but forgetting to change others. There's a principle at play in this kind of abstraction, often referred to as DRY (don't repeat yourself).
 
-DRY strives to have only one definition in a program for any given task. An alternate quip to motivate DRY coding is that programmers are just generally lazy and don't want to do unnecessary work.
+DRY strives to have only one definition in a program for any given task. An alternate aphorism to motivate DRY coding is that programmers are just generally lazy and don't want to do unnecessary work.
 
 Abstraction can be taken too far. Consider:
 
 ```js
 function conditionallyStoreData(store,location,value,checkFn) {
-	if (checkFn( value, store, location )) {
-		store[location] = value;
-	}
+    if (checkFn( value, store, location )) {
+        store[location] = value;
+    }
 }
 
 function notEmpty(val) { return val != ""; }
@@ -522,19 +532,19 @@ function notEmpty(val) { return val != ""; }
 function isUndefined(val) { return val === undefined; }
 
 function isPropUndefined(val,obj,prop) {
-	return isUndefined( obj[prop] );
+    return isUndefined( obj[prop] );
 }
 
 function saveComment(txt) {
-	conditionallyStoreData( comments, comments.length, txt, notEmpty );
+    conditionallyStoreData( comments, comments.length, txt, notEmpty );
 }
 
 function trackEvent(evt) {
-	conditionallyStoreData( events, evt.name, evt, isPropUndefined );
+    conditionallyStoreData( events, evt.name, evt, isPropUndefined );
 }
 ```
 
-In an effort to DRY and avoid repeating an `if` statement, we moved the conditional into the general abstraction. We also assumed that we may have checks for non-empty strings or non-`undefined` values elsewhere in the program, so we might as well DRY those out, too!
+In an effort to be DRY and avoid repeating an `if` statement, we moved the conditional into the general abstraction. We also assumed that we *may* have checks for non-empty strings or non-`undefined` values elsewhere in the program in the future, so we might as well DRY those out, too!
 
 This code *is* more DRY, but to an overkill extent. Programmers must be careful to apply the appropriate levels of abstraction to each part of their program, no more, no less.
 
@@ -542,27 +552,33 @@ Regarding our greater discussion of function composition in this chapter, it mig
 
 Moreover, **composition is helpful even if there's only one occurrence of something** (no repetition to DRY out).
 
+### Separation Enables Focus
+
 Aside from generalization vs specialization, I think there's another more useful definition for abstraction, as revealed by this quote:
 
 > ... abstraction is a process by which the programmer associates a name with a potentially complicated program fragment, which can then be thought of in terms of its purpose of function, rather than in terms of how that function is achieved. By hiding irrelevant details, abstraction reduces conceptual complexity, making it possible for the programmer to focus on a manageable subset of the program text at any particular time.
 >
-> Programming Language Pragmatics, Michael L Scott
->
-> https://books.google.com/books?id=jM-cBAAAQBAJ&pg=PA115&lpg=PA115&dq=%22making+it+possible+for+the+programmer+to+focus+on+a+manageable+subset%22&source=bl&ots=yrJ3a-Tvi6&sig=XZwYoWwbQxP2w5qh2k2uMAPj47k&hl=en&sa=X&ved=0ahUKEwjKr-Ty35DSAhUJ4mMKHbPrAUUQ6AEIIzAA#v=onepage&q=%22making%20it%20possible%20for%20the%20programmer%20to%20focus%20on%20a%20manageable%20subset%22&f=false
-
-// TODO: make a proper reference to this book/quote, or at least find a better online link
+> Scott, Michael L. “Chapter 3: Names, Scopes, and Bindings.” Programming Language Pragmatics, 4th ed., Morgan Kaufmann, 2015, pp. 115.
 
 The point this quote makes is that abstraction -- generally, pulling out some piece of code into its own function -- serves the primary purpose of separating apart two pieces of functionality so that each piece can be focused on independent of the other.
 
-Note that abstraction in this sense is not intended to *hide* details, as if to treat things as black boxes. That notion is more closely associated with the programming principle of encapsulation. **We're not abstracting to hide, but to separate to improve focus**.
+Note that abstraction in this sense is not really intended to *hide* details, as if to treat things as black boxes we *never* examine.
+
+In this quote, "irrelevant", in terms of what is hidden, shouldn't be thought of as an absolute qualitative judgement, but rather relative to what you want to focus on at any given moment. In other words, when we separate X from Y, if I want to focus on X, Y is irrelevant at that moment. At another time, if I want to focus on Y, X is irrelevant at that moment.
+
+**We're not abstracting to hide, but to separate to improve focus**.
 
 Recall that at the outset of this text I described the goal of FP as creating more readable, understandable code. One effective way of doing that is untangling complected -- read: tightly braided, as in strands of rope -- code into separate, simpler -- read: loosely bound -- pieces of code. In that way, the reader isn't distracted by the details of one part while looking for the details of the other part.
 
-Our higher goal is not to implement something only once, as it is with the DRY mindset. As a matter of fact, sometimes we'll actually repeat ourselves in code. Instead, we seek to implement separate things, separately. We're trying to improve focus, because that improves readability.
+Our higher goal is not to implement something only once, as it is with the DRY mindset. As a matter of fact, sometimes we'll actually repeat ourselves in code.
+
+As we asserted in Chapter 3, the main goal with abstraction is to implement separate things, separately. We're trying to improve focus, because that improves readability.
+
+By separating two ideas, we insert a semantic boundary between them, which affords us the ability to focus on each side independent of the other. In many cases, that semantic boundary is something like the name of a function. The function's implementation is focused on *how* to compute something, and the call-site using that function by name is focused on *what* to do with its output. We abstract the *how* from the *what* so they are separate and separately reason'able.
 
 Another way of describing this goal is with imperative vs declarative programming style. Imperative code is primarily concerned with explicitly stating *how* to accomplish a task. Declarative code states *what* the outcome should be, and leaves the implementation to some other responsibility.
 
-In other words, declarative code abstracts the *what* from the *how*. Typically declarative coding is favored in readability over imperative, though no program (except of course machine code 1's and 0's) is ever entirely one or the other. The programmer must seek balance between them.
+Declarative code abstracts the *what* from the *how*. Typically declarative coding is favored in readability over imperative, though no program (except of course machine code 1's and 0's) is ever entirely one or the other. The programmer must seek balance between them.
 
 ES6 added many syntactic affordances that transform old imperative operations into newer declarative forms. Perhaps one of the clearest is destructuring. Destructuring is a pattern for assignment that describes how a compound value (object, array) is taken apart into its constituent values.
 
@@ -570,7 +586,7 @@ Here's an example of array destructuring:
 
 ```js
 function getData() {
-	return [1,2,3,4,5];
+    return [1,2,3,4,5];
 }
 
 // imperative
@@ -597,7 +613,7 @@ Recall the `shorterWords(..)` example from earlier. Let's compare an imperative 
 ```js
 // imperative
 function shorterWords(text) {
-	return skipLongWords( unique( words( text ) ) );
+    return skipLongWords( unique( words( text ) ) );
 }
 
 // declarative
@@ -645,9 +661,9 @@ var getPerson = partial( ajax, "http://some.api/person" );
 var getLastOrder = partial( ajax, "http://some.api/order", { id: -1 } );
 
 getLastOrder( function orderFound(order){
-	getPerson( { id: order.personId }, function personFound(person){
-		output( person.name );
-	} );
+    getPerson( { id: order.personId }, function personFound(person){
+        output( person.name );
+    } );
 } );
 ```
 
@@ -657,7 +673,7 @@ Let's start by trying to get the `person` "point" out of the `personFound(..)` f
 
 ```js
 function extractName(person) {
-	return person.name;
+    return person.name;
 }
 ```
 
@@ -665,13 +681,13 @@ But let's observe that this operation could instead be expressed in generic term
 
 ```js
 function prop(name,obj) {
-	return obj[name];
+    return obj[name];
 }
 
 // or the ES6 => form
 var prop =
-	(name,obj) =>
-		obj[name];
+    (name,obj) =>
+        obj[name];
 ```
 
 While we're dealing with object properties, let's also define the opposite utility: `setProp(..)` for setting a property value onto an object.
@@ -680,9 +696,9 @@ However, we want to be careful not to just mutate an existing object but rather 
 
 ```js
 function setProp(name,obj,val) {
-	var o = Object.assign( {}, obj );
-	o[name] = val;
-	return o;
+    var o = Object.assign( {}, obj );
+    o[name] = val;
+    return o;
 }
 ```
 
@@ -698,7 +714,7 @@ Next, let's narrow the focus on our example's nested lookup calls to this:
 
 ```js
 getLastOrder( function orderFound(order){
-	getPerson( { id: order.personId }, outputPersonName );
+    getPerson( { id: order.personId }, outputPersonName );
 } );
 ```
 
@@ -726,7 +742,7 @@ Let's reconstruct the nested lookups example again with our new function:
 
 ```js
 getLastOrder( function orderFound(order){
-	processPerson( { id: order.personId } );
+    processPerson( { id: order.personId } );
 } );
 ```
 
@@ -742,13 +758,13 @@ To construct the object (of the form `{ id: .. }`) that needs to be passed to `p
 
 ```js
 function makeObjProp(name,value) {
-	return setProp( name, {}, value );
+    return setProp( name, {}, value );
 }
 
 // or the ES6 => form
 var makeObjProp =
-	(name,value) =>
-		setProp( name, {}, value );
+    (name,value) =>
+        setProp( name, {}, value );
 ```
 
 **Tip:** This utility is known as `objOf(..)` in the Ramda library.
@@ -796,14 +812,14 @@ And even if you didn't like seeing/naming all those intermediate steps, you can 
 ```js
 partial( ajax, "http://some.api/order", { id: -1 } )
 (
-	compose(
-		partialRight(
-			partial( ajax, "http://some.api/person" ),
-			compose( output, partial( prop, "name" ) )
-		),
-		partial( makeObjProp, "id" ),
-		partial( prop, "personId" )
-	)
+    compose(
+        partialRight(
+            partial( ajax, "http://some.api/person" ),
+            compose( output, partial( prop, "name" ) )
+        ),
+        partial( makeObjProp, "id" ),
+        partial( prop, "personId" )
+    )
 );
 ```
 
@@ -813,8 +829,10 @@ This snippet is less verbose for sure, but I think it's less readable than the p
 
 Function composition is a pattern for defining a function that routes the output of one function call into another function call, and its output to another, and so on.
 
-Because JS functions can only return single values, the pattern essentially dictates that all functions in the composition (except perhaps the first called) need to be unary, taking only a single input from the output of the previous.
+Because JS functions can only return single values, the pattern essentially dictates that all functions in the composition (except perhaps the first called) need to be unary, taking only a single input from the output of the previous function.
 
-Instead of listing out each step as a discrete call in our code, function composition using a utility like `compose(..)` abstracts that implementation detail so the code is more readable, allowing us to focus on *what* the composition will be used to accomplish, not *how* it will be performed.
+Instead of listing out each step as a discrete call in our code, function composition using a utility like `compose(..)` or `pipe(..)` abstracts that implementation detail so the code is more readable, allowing us to focus on *what* the composition will be used to accomplish, not *how* it will be performed.
 
-Composition -- declarative data flow -- is one of the most important tools that underpins most of the rest of FP.
+Composition is declarative data flow, meaning our code describes the flow of data in an explicit, obvious, and readable way.
+
+Composition is the most important foundational pattern in all of FP, in large part because it's the only way to route data through our programs aside from using side effects; the next chapter explores why such should be avoided wherever possible.

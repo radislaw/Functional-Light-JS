@@ -37,41 +37,41 @@ And what does any of this have to do with functional programming? Pull up a chai
 
 First, let's make sure we're all on the same page when we refer to closures and objects. We're obviously in the context of how JavaScript deals with these two mechanisms, and specifically talking about simple function closure (see "Keeping Scope" in Chapter 2) and simple objects (collections of key-value pairs).
 
-A simple function closure:
+For the record, here's an illustration of a simple function closure:
 
 ```js
 function outer() {
-	var one = 1;
-	var two = 2;
+    var one = 1;
+    var two = 2;
 
-	return function inner(){
-		return one + two;
-	};
+    return function inner(){
+        return one + two;
+    };
 }
 
 var three = outer();
 
-three();			// 3
+three();            // 3
 ```
 
-A simple object:
+And an illustration of a simple object:
 
 ```js
 var obj = {
-	one: 1,
-	two: 2
+    one: 1,
+    two: 2
 };
 
 function three(outer) {
-	return outer.one + outer.two;
+    return outer.one + outer.two;
 }
 
-three( obj );		// 3
+three( obj );       // 3
 ```
 
 Many people conjur lots of extra things when you mention "closure", such as the asynchronous callbacks or even the module pattern with encapsulation and information hiding. Similarly, "object" brings to mind classes, `this`, prototypes, and a whole slew of other utilities and patterns.
 
-As we go along, we'll carefully address the parts of this external context that matter, but for now, try to just stick to the simplest interpretations of "closure" and "object" -- it'll make this exploration less confusing.
+As we go along, we'll carefully address the parts of this external context that matter, but for now, try to just stick to the simplest interpretations of "closure" and "object" as illustrated here; it'll make our exploration less confusing.
 
 ## Look Alike
 
@@ -90,17 +90,17 @@ Consider this code from above:
 
 ```js
 function outer() {
-	var one = 1;
-	var two = 2;
+    var one = 1;
+    var two = 2;
 
-	return function inner(){
-		return one + two;
-	};
+    return function inner(){
+        return one + two;
+    };
 }
 
 var obj = {
-	one: 1,
-	two: 2
+    one: 1,
+    two: 2
 };
 ```
 
@@ -110,9 +110,9 @@ As a matter of fact, it's fairly straightforward to represent an object as a clo
 
 ```js
 var point = {
-	x: 10,
-	y: 12,
-	z: 14
+    x: 10,
+    y: 12,
+    z: 14
 };
 ```
 
@@ -120,13 +120,13 @@ Did you come up with something like?
 
 ```js
 function outer() {
-	var x = 10;
-	var y = 12;
-	var z = 14;
+    var x = 10;
+    var y = 12;
+    var z = 14;
 
-	return function inner(){
-		return [x,y,z];
-	}
+    return function inner(){
+        return [x,y,z];
+    }
 };
 
 var point = outer();
@@ -138,12 +138,12 @@ What if we have nested objects?
 
 ```js
 var person = {
-	name: "Kyle Simpson",
-	address: {
-		street: "123 Easy St",
-		city: "JS'ville",
-		state: "ES"
-	}
+    name: "Kyle Simpson",
+    address: {
+        street: "123 Easy St",
+        city: "JS'ville",
+        state: "ES"
+    }
 };
 ```
 
@@ -151,20 +151,20 @@ We could represent that same kind of state with nested closures:
 
 ```js
 function outer() {
-	var name = "Kyle Simpson";
-	return middle();
+    var name = "Kyle Simpson";
+    return middle();
 
-	// ********************
+    // ********************
 
-	function middle() {
-		var street = "123 Easy St";
-		var city = "JS'ville";
-		var state = "ES";
+    function middle() {
+        var street = "123 Easy St";
+        var city = "JS'ville";
+        var state = "ES";
 
-		return function inner(){
-			return [name,street,city,state];
-		};
-	}
+        return function inner(){
+            return [name,street,city,state];
+        };
+    }
 }
 
 var person = outer();
@@ -174,40 +174,40 @@ Let's practice going the other direction, from closure to object:
 
 ```js
 function point(x1,y1) {
-	return function distFromPoint(x2,y2){
-		return Math.sqrt(
-			Math.pow( x2 - x1, 2 ) +
-			Math.pow( y2 - y1, 2 )
-		);
-	};
+    return function distFromPoint(x2,y2){
+        return Math.sqrt(
+            Math.pow( x2 - x1, 2 ) +
+            Math.pow( y2 - y1, 2 )
+        );
+    };
 }
 
 var pointDistance = point( 1, 1 );
 
-pointDistance( 4, 5 );		// 5
+pointDistance( 4, 5 );      // 5
 ```
 
 `distFromPoint(..)` is closed over `x1` and `y1`, but we could instead explicitly pass those values as an object:
 
 ```js
 function pointDistance(point,x2,y2) {
-	return Math.sqrt(
-		Math.pow( x2 - point.x1, 2 ) +
-		Math.pow( y2 - point.y1, 2 )
-	);
+    return Math.sqrt(
+        Math.pow( x2 - point.x1, 2 ) +
+        Math.pow( y2 - point.y1, 2 )
+    );
 };
 
 pointDistance(
-	{ x1: 1, y1: 1 },
-	4,	// x2
-	5	// y2
+    { x1: 1, y1: 1 },
+    4,  // x2
+    5   // y2
 );
 // 5
 ```
 
 The `point` object state explicitly passed in replaces the closure that implicitly held that state.
 
-#### Behavior, Too!
+### Behavior, Too!
 
 It's not just that objects and closures represent ways to express collections of state, but also that they can include behavior via functions/methods. Bundling data with its behavior has a fancy name: encapsulation.
 
@@ -215,17 +215,17 @@ Consider:
 
 ```js
 function person(name,age) {
-	return happyBirthday(){
-		age++;
-		console.log(
-			"Happy " + age + "th Birthday, " + name + "!"
-		);
-	}
+    return happyBirthday(){
+        age++;
+        console.log(
+            `Happy ${age}th Birthday, ${name}!`
+        );
+    }
 }
 
 var birthdayBoy = person( "Kyle", 36 );
 
-birthdayBoy();			// Happy 37th Birthday, Kyle!
+birthdayBoy();          // Happy 37th Birthday, Kyle!
 ```
 
 The inner function `happyBirthday()` has closure over `name` and `age` so that the functionality therein is kept with the state.
@@ -234,14 +234,14 @@ We can achieve that same capability with a `this` binding to an object:
 
 ```js
 var birthdayBoy = {
-	name: "Kyle",
-	age: 36,
-	happyBirthday() {
-		this.age++;
-		console.log(
-			"Happy " + this.age + "th Birthday, " + this.name + "!"
-		);
-	}
+    name: "Kyle",
+    age: 36,
+    happyBirthday() {
+        this.age++;
+        console.log(
+            `Happy ${this.age}th Birthday, ${this.name}!`
+        );
+    }
 };
 
 birthdayBoy.happyBirthday();
@@ -256,14 +256,14 @@ As a matter of fact, you could even expose multiple methods with a single closur
 
 ```js
 var person = {
-	firstName: "Kyle",
-	lastName: "Simpson",
-	first() {
-		return this.firstName;
-	},
-	last() {
-		return this.lastName;
-	}
+    firstName: "Kyle",
+    lastName: "Simpson",
+    first() {
+        return this.firstName;
+    },
+    last() {
+        return this.lastName;
+    }
 }
 
 person.first() + " " + person.last();
@@ -274,28 +274,28 @@ Just using closure without objects, we could represent this program as:
 
 ```js
 function createPerson(firstName,lastName) {
-	return API;
+    return API;
 
-	// ********************
+    // ********************
 
-	function API(methodName) {
-		switch (methodName) {
-			case "first":
-				return first();
-				break;
-			case "last":
-				return last();
-				break;
-		};
-	}
+    function API(methodName) {
+        switch (methodName) {
+            case "first":
+                return first();
+                break;
+            case "last":
+                return last();
+                break;
+        };
+    }
 
-	function first() {
-		return firstName;
-	}
+    function first() {
+        return firstName;
+    }
 
-	function last() {
-		return lastName;
-	}
+    function last() {
+        return lastName;
+    }
 }
 
 var person = createPerson( "Kyle", "Simpson" );
@@ -314,17 +314,17 @@ That's because what we care about, as discussed in Chapter 6, is **value** mutab
 
 ```js
 function outer() {
-	var x = 1;
-	var y = [2,3];
+    var x = 1;
+    var y = [2,3];
 
-	return function inner(){
-		return [ x, y[0], y[1] ];
-	};
+    return function inner(){
+        return [ x, y[0], y[1] ];
+    };
 }
 
 var xyPublic = {
-	x: 1,
-	y: [2,3]
+    x: 1,
+    y: [2,3]
 };
 ```
 
@@ -334,27 +334,27 @@ We can reinforce the point that objects and closures have no bearing on mutabili
 
 ```js
 function outer() {
-	var x = 1;
-	return middle();
+    var x = 1;
+    return middle();
 
-	// ********************
+    // ********************
 
-	function middle() {
-		var y0 = 2;
-		var y1 = 3;
+    function middle() {
+        var y0 = 2;
+        var y1 = 3;
 
-		return function inner(){
-			return [ x, y0, y1 ];
-		};
-	}
+        return function inner(){
+            return [ x, y0, y1 ];
+        };
+    }
 }
 
 var xyPublic = {
-	x: 1,
-	y: {
-		0: 2,
-		1: 3
-	}
+    x: 1,
+    y: {
+        0: 2,
+        1: 3
+    }
 };
 ```
 
@@ -380,11 +380,11 @@ But instead of thinking about numbers, let's relate isomorphism to code. Again q
 
 > [W]hat would isomorphic JS be if there were such a thing? Well, it could be that you have one set of JS code that is converted to another set of JS code, and that (importantly) you could convert from the latter back to the former if you wanted.
 
-As we asserted earlier with our examples of closures-as-objects and objects-as-closures, these representative alternations go either way. In this respect, they are isomorphisms of each other.
+As we asserted earlier with our examples of closures-as-objects and objects-as-closures, these representative alternations go either way. In this respect, they are isomorphisms to each other.
 
 Put simply, closures and objects are isomorphic representations of state (and its associated functionality).
 
-The next time you hear someone say "X is isomorphic with Y", what they mean is, "X and Y can be converted from either one to the other in either direction, and maintain the same behavior regardless."
+The next time you hear someone say "X is isomorphic to Y", what they mean is, "X and Y can be converted from either one to the other in either direction, and not lose information."
 
 ### Under The Hood
 
@@ -394,11 +394,11 @@ Think about it this way: in the following code, how is JS keeping track of the `
 
 ```js
 function outer() {
-	var x = 1;
+    var x = 1;
 
-	return function inner(){
-		return x;
-	};
+    return function inner(){
+        return x;
+    };
 }
 ```
 
@@ -406,7 +406,7 @@ We could imagine that the scope -- the set of all variables defined -- of `outer
 
 ```js
 scopeOfOuter = {
-	x: 1
+    x: 1
 };
 ```
 
@@ -453,7 +453,7 @@ For example, let's imagine tracking the keypress events in a game. Almost certai
 
 ```js
 function trackEvent(evt,keypresses = []) {
-	return keypresses.concat( evt );
+    return [ ...keypresses, evt ];
 }
 
 var keypresses = trackEvent( newEvent1 );
@@ -461,7 +461,7 @@ var keypresses = trackEvent( newEvent1 );
 keypresses = trackEvent( newEvent2, keypresses );
 ```
 
-**Note:** Did you spot why I used `concat(..)` instead of `push(..)`ing directly to `keypresses`? Because in FP, we typically want to treat arrays as immutable data structures that can be recreated and added to, but not directly changed. We trade out the evil of side-effects for an explicit reassignment (more on that later).
+**Note:** Did you spot why I didn't `push(..)` directly to `keypresses`? Because in FP, we typically want to treat arrays as immutable data structures that can be recreated and added to, but not directly changed. We trade out the evil of side-effects for an explicit reassignment (more on that later).
 
 Though we're not changing the structure of the array, we could if we wanted to. More on this in a moment.
 
@@ -469,9 +469,9 @@ But an array is not the only way to track this growing "list" of `evt` objects. 
 
 ```js
 function trackEvent(evt,keypresses = () => []) {
-	return function newKeypresses() {
-		return [ ...keypresses(), evt ];
-	};
+    return function newKeypresses() {
+        return [ ...keypresses(), evt ];
+    };
 }
 
 var keypresses = trackEvent( newEvent1 );
@@ -485,9 +485,9 @@ Each time we add a new event to the "list", we create a new closure wrapped arou
 
 So which one is better suited for our task? No surprise here, the array approach is probably a lot more appropriate. The structural immutability of a closure means our only option is to wrap more closure around it. Objects are by default extensible, so we can just grow the array as needed.
 
-By the way, even though I'm presenting this structural (im)mutability as a clear difference between closure and object, the way we're using the object as an immutable value is actually more similar than dislike.
+By the way, even though I'm presenting this structural (im)mutability as a clear difference between closure and object, the way we're using the object as an immutable value is actually more similar than not.
 
-Creating a new array (via `concat(..)`) for each addition to the array is treating the array as structurally immutable, which is conceptually symmetrical to closure being structurally immutable by its very design.
+Creating a new array for each addition to the array is treating the array as structurally immutable, which is conceptually symmetrical to closure being structurally immutable by its very design.
 
 ### Privacy
 
@@ -497,26 +497,26 @@ Consider lexical closure hiding:
 
 ```js
 function outer() {
-	var x = 1;
+    var x = 1;
 
-	return function inner(){
-		return x;
-	};
+    return function inner(){
+        return x;
+    };
 }
 
 var xHidden = outer();
 
-xHidden();			// 1
+xHidden();          // 1
 ```
 
 Now the same state in public:
 
 ```js
 var xPublic = {
-	x: 1
+    x: 1
 };
 
-xPublic.x;			// 1
+xPublic.x;          // 1
 ```
 
 There's some obvious differences around general software engineering principles -- consider abstraction, the module pattern with public and private APIs, etc -- but let's try to constrain our discussion to the perspective of FP; this is, after all, a book about functional programming!
@@ -529,8 +529,8 @@ One of the advantages of managing state as public properties on an object is tha
 
 ```js
 function recordKeypress(keypressEvt) {
-	// database utility
-	DB.store( "keypress-events", keypressEvt );
+    // database utility
+    DB.store( "keypress-events", keypressEvt );
 }
 ```
 
@@ -546,26 +546,26 @@ For example, we can give our closure-`keypresses` example its own `forEach`,  li
 
 ```js
 function trackEvent(
-	evt,
-	keypresses = {
-		list() { return []; },
-		forEach() {}
-	}
+    evt,
+    keypresses = {
+        list() { return []; },
+        forEach() {}
+    }
 ) {
-	return {
-		list() {
-			return [ ...keypresses.list(), evt ];
-		},
-		forEach(fn) {
-			keypresses.forEach( fn );
-			fn( evt );
-		}
-	};
+    return {
+        list() {
+            return [ ...keypresses.list(), evt ];
+        },
+        forEach(fn) {
+            keypresses.forEach( fn );
+            fn( evt );
+        }
+    };
 }
 
 // ..
 
-keypresses.list();		// [ evt, evt, .. ]
+keypresses.list();      // [ evt, evt, .. ]
 
 keypresses.forEach( recordKeypress );
 ```
@@ -596,7 +596,7 @@ Many FPers take a hard-line stance on reassignment: it shouldn't be used. They w
 
 This book is about "functional light" programming in JavaScript, and this is one of those cases where I diverge from the core FP crowd.
 
-I think variable reassignment can be quite useful and, when used approriately, quite readable in its explicitness. It's certainly been by experience that debugging is a lot easier when you can insert a `debugger` or breakpoint, or track a watch expression.
+I think variable reassignment can be quite useful and, when used approriately, quite readable in its explicitness. It's certainly been my experience that debugging is a lot easier when you can insert a `debugger` or breakpoint, or track a watch expression.
 
 ### Cloning State
 
@@ -612,16 +612,16 @@ var a = [ 1, 2, 3 ];
 var b = a.slice();
 b.push( 4 );
 
-a;			// [1,2,3]
-b;			// [1,2,3,4]
+a;          // [1,2,3]
+b;          // [1,2,3,4]
 ```
 
 Objects can be shallow-cloned relatively easily too:
 
 ```js
 var o = {
-	x: 1,
-	y: 2
+    x: 1,
+    y: 2
 };
 
 // in ES2017+, using object spread:
@@ -653,12 +653,12 @@ Let's consider a scenario with both implementations. First, the closure-style im
 
 ```js
 function StudentRecord(name,major,gpa) {
-	return function printStudent(){
-		return `${name}, Major: ${major}, GPA: ${gpa.toFixed(1)}`;
-	};
+    return function printStudent(){
+        return `${name}, Major: ${major}, GPA: ${gpa.toFixed(1)}`;
+    };
 }
 
-var student = StudentRecord( "Kyle Simpson", "kyle@some.tld", "CS", 4 );
+var student = StudentRecord( "Kyle Simpson", "CS", 4 );
 
 // later
 
@@ -672,13 +672,13 @@ Now for the object (and `this`) approach:
 
 ```js
 function StudentRecord(){
-	return `${this.name}, Major: ${this.major}, GPA: ${this.gpa.toFixed(1)}`;
+    return `${this.name}, Major: ${this.major}, GPA: ${this.gpa.toFixed(1)}`;
 }
 
 var student = StudentRecord.bind( {
-	name: "Kyle Simpson",
-	major: "CS",
-	gpa: 4
+    name: "Kyle Simpson",
+    major: "CS",
+    gpa: 4
 } );
 
 // later
@@ -699,9 +699,9 @@ One way to think about what `bind(..)` does under the covers is that it creates 
 
 ```js
 function bind(orinFn,thisObj) {
-	return function boundFn(...args) {
-		return origFn.apply( thisObj, args );
-	};
+    return function boundFn(...args) {
+        return origFn.apply( thisObj, args );
+    };
 }
 
 var student = bind( StudentRecord, { name: "Kyle.." } );
@@ -726,3 +726,13 @@ I just want to reiterate: these performance observations are not absolutes, and 
 ## Summary
 
 The truth of this chapter cannot be written out. One must read this chapter to find its truth.
+
+----
+
+Coining some Zen wisdom here was my attempt at being clever. But, you deserve a proper summary of this chapter's message.
+
+Objects and closures are isomorphic to each other, which means that can be used somewhat interchangably to represent state and behavior in your program.
+
+Representation as a closure has certain benefits, like granular change control and automatic privacy. Representation as an object has other benefits, like easier cloning of state.
+
+The critically thinking FPer should be able to conceive any segment of state and behavior in the program with either representation, and pick the representation that's most appropriate for the task at hand.

@@ -25,8 +25,8 @@ var x = 2;
 
 x.length = 4;
 
-x;				// 2
-x.length;		// undefined
+x;              // 2
+x.length;       // undefined
 ```
 
 Numbers do not normally have a `length` property available, so the `x.length = 4` setting is trying to add a new property, and it silently fails (or is ignored/discarded, depending on your point-of-view); `x` continues to hold the simple primitive `2` number.
@@ -49,12 +49,12 @@ The immutability of simple primitives like `number`s probably seems fairly obvio
 ```js
 var s = "hello";
 
-s[1];				// "e"
+s[1];               // "e"
 
 s[1] = "E";
 s.length = 10;
 
-s;					// "hello"
+s;                  // "hello"
 ```
 
 Despite being able to access `s[1]` like it's an array, JS strings are not real arrays. Setting `s[1] = "E"` and `s.length = 10` both silently fail, just as `x.length = 4` did above. In strict mode, these assignments will fail, because both the `1` property and the `length` property are read-only on this primitive `string` value.
@@ -66,12 +66,12 @@ Interestingly, even the boxed `String` object value will act (mostly) immutable 
 
 var s = new String( "hello" );
 
-s[1] = "E";			// error
-s.length = 10;		// error
+s[1] = "E";         // error
+s.length = 10;      // error
 
-s[42] = "?";		// OK
+s[42] = "?";        // OK
 
-s;					// "hello"
+s;                  // "hello"
 ```
 
 ## Value To Value
@@ -84,11 +84,11 @@ For example:
 
 ```js
 function addValue(arr) {
-	var newArr = [ ...arr, 4 ];
-	return newArr;
+    var newArr = [ ...arr, 4 ];
+    return newArr;
 }
 
-addValue( [1,2,3] );	// [1,2,3,4]
+addValue( [1,2,3] );    // [1,2,3,4]
 ```
 
 Notice that we did not change the array that `arr` references, but rather created a new array (`newArr`) that contains the existing values plus the new `4` value.
@@ -105,13 +105,13 @@ We can use the copy-instead-of-mutate strategy for objects, too. Consider:
 
 ```js
 function updateLastLogin(user) {
-	var newUserRecord = Object.assign( {}, user );
-	newUserRecord.lastLogin = Date.now();
-	return newUserRecord;
+    var newUserRecord = Object.assign( {}, user );
+    newUserRecord.lastLogin = Date.now();
+    return newUserRecord;
 }
 
 var user = {
-	// ..
+    // ..
 };
 
 user = updateLastLogin( user );
@@ -119,7 +119,13 @@ user = updateLastLogin( user );
 
 ### Non-Local
 
-The importance of an immutable value can be seen if you do something like this:
+Non-primitive values are held by reference, and when passed as arguments, it's the reference that's copied, not the value itself.
+
+If you have an object or array in one part of the program, and pass it to a function that resides in another part of the program, that function can now affect the value via this reference copy, mutating it in possibly unexpected ways.
+
+In other words, if passed as arguments, non-primitive values become non-local. Potentially the entire program has to be considered to understand whether such a value will be changed or not.
+
+Consider:
 
 ```js
 var arr = [1,2,3];
@@ -129,19 +135,17 @@ foo( arr );
 console.log( arr[0] );
 ```
 
-Ostensibly, you're expecting `arr[0]` to still be the value `1`. But is it? You don't know, because `foo(..)` *might* mutate the array using the reference you pass to it.
+Ostensibly, you're expecting `arr[0]` to still be the value `1`. But is it? You don't know, because `foo(..)` *might* mutate the array using the reference copy you pass to it.
 
 We already saw a cheat in the previous chapter to avoid such a surprise:
 
 ```js
 var arr = [1,2,3];
 
-foo( arr.slice() );			// ha! a copy!
+foo( arr.slice() );         // ha! a copy!
 
-console.log( arr[0] );		// 1
+console.log( arr[0] );      // 1
 ```
-
-Of course, that assertion holds true only if `foo` doesn't skip its parameter and reference our same `arr` via free variable lexical reference!
 
 In a little bit, we'll see another strategy for protecting ourselves from a value being mutated out from underneath us unexpectedly.
 
@@ -153,7 +157,7 @@ How would you describe what a "constant" is? Think about that for a moment befor
 
 Some of you may have conjured descriptions like, "a value that can't change", "a variable that can't be changed", etc. These are all approximately in the neighborhood, but not quite at the right house. The precise definition we should use for a constant is: a variable that cannot be reassigned.
 
-This nitpicking is really important, because it clarifies that a constant actually has nothing to do with the value, except to say that whatever value a constant holds, that variable cannot be reassigned to any other value. But it says nothing about the nature of the value itself.
+This nitpicking is really important, because it clarifies that a constant actually has nothing to do with the value, except to say that whatever value a constant holds, that variable cannot be reassigned any other value. But it says nothing about the nature of the value itself.
 
 Consider:
 
@@ -173,7 +177,7 @@ It's true that this later line will fail with an error:
 
 ```js
 // try to change `x`, fingers crossed!
-x = 3;		// Error!
+x = 3;      // Error!
 ```
 
 But again, we're not changing anything about the value. We're attempting to reassign the variable `x`. The values involved are almost incidental.
@@ -208,9 +212,9 @@ To back up my assertion, let's take a reality check. `const` creates a block sco
 // lots of code
 
 {
-	const x = 2;
+    const x = 2;
 
-	// a few lines of code
+    // a few lines of code
 }
 
 // lots of code
@@ -226,9 +230,9 @@ My claims is: that program has basically the same magnitude of readability as th
 // lots of code
 
 {
-	let x = 2;
+    let x = 2;
 
-	// a few lines of code
+    // a few lines of code
 }
 
 // lots of code
@@ -262,7 +266,25 @@ The value `3.141592` is already immutable, and I'm clearly signaling, "this `PI`
 
 I've written and seen a lot of JavaScript, and I just think it's an imagined problem that very many of our bugs come from accidental reassignment.
 
-The thing we need to worry about is not whether our variables get reassigned, but **whether our values get mutated**. Why? Because values are portable; lexical assignments are not. You can pass an array to a function, and it can be changed without you realizing it. But you cannot have a reassignment happen unexpectedly caused by some other part of your program.
+One of the reasons FPers so highly favor `const` and avoid reassignment is because of equational reasoning. Though this topic is more related to other languages than JS and goes beyond what we'll get into here, it is a valid point. However, I prefer the pragmatic view over the more academic one.
+
+For example, I've found measured use of variable reassignment can be useful in simplifying the description of intermediate states of computation. When a value is goes through multiple type coercions or other transformations, I don't generally want to come up with new variable names for each representation:
+
+```js
+var a = "420";
+
+// later
+
+a = Number( a );
+
+// later
+
+a = [ a ];
+```
+
+If after changing from `"420"` to `420`, the original `"420"` value is no longer needed, then I think it's more readable to reassign `a` rather than come up with a new variable name like `aNum`.
+
+The thing we really should worry more about is not whether our variables get reassigned, but **whether our values get mutated**. Why? Because values are portable; lexical assignments are not. You can pass an array to a function, and it can be changed without you realizing it. But you cannot have a reassignment happen unexpectedly caused by some other part of your program.
 
 ### It's Freezing In Here
 
@@ -297,7 +319,7 @@ var arr = Object.freeze( [1,2,3] );
 
 foo( arr );
 
-console.log( arr[0] );			// 1
+console.log( arr[0] );          // 1
 ```
 
 Now `arr[0]` is quite reliably `1`.
@@ -321,50 +343,52 @@ Think about a specialized data structure that's like an array, but that you want
 Internally, it might be like a linked-list tree of object references where each node in the tree represents a mutation of the original value. Actually, this is conceptually similar to how **git** version control works.
 
 <p align="center">
-	<img src="fig18.png" width="490">
+    <img src="fig18.png" width="490">
 </p>
+
+In the above conceptual illustration, an original array `[3,6,1,0]` first has the mutation of value `4` assigned to position `0` (resulting in `[4,6,1,0]`), then `1` is assigned to position `3` (now `[4,6,1,1]`), finally `2` is assigned to position `4` (result: `[4,6,1,1,2]`). The key idea is that at each mutation, only the change from the previous version is recorded, not a duplication of the entire original data structure. This approach is much more efficient in both memory and CPU performance, in general.
 
 Imagine using this hypothetical specialized array data structure like this:
 
 ```js
-var state = specialArray( 1, 2, 3, 4 );
+var state = specialArray( 4, 6, 1, 1 );
 
-var newState = state.set( 42, "meaning of life" );
+var newState = state.set( 4, 2 );
 
-state === newState;					// false
+state === newState;                 // false
 
-state.get( 2 );						// 3
-state.get( 42 );					// undefined
+state.get( 2 );                     // 1
+state.get( 4 );                     // undefined
 
-newState.get( 2 );					// 3
-newState.get( 42 );					// "meaning of life"
+newState.get( 2 );                  // 1
+newState.get( 4 );                  // 2
 
-newState.slice( 1, 3 );				// [2,3]
+newState.slice( 2, 5 );             // [1,1,2]
 ```
 
-The `specialArray(..)` data structure would internally keep track of each mutation operation (like `set(..)`) as a *diff*, so it won't have to reallocate memory for the original values (`1`, `2`, `3`, and `4`) just to add the `"meaning of life"` value to the list. But importantly, `state` and `newState` point at different versions of the array value, so **the value immutability semantic is preserved.**
+The `specialArray(..)` data structure would internally keep track of each mutation operation (like `set(..)`) as a *diff*, so it won't have to reallocate memory for the original values (`4`, `6`, `1`, and `1`) just to add the `2` value to the end of the list. But importantly, `state` and `newState` point at different versions (or views) of the array value, so **the value immutability semantic is preserved.**
 
 Inventing your own performance-optimized data structures is an interesting challenge. But pragmatically, you should probably use a library that already does this well. One great option is **Immutable.js** (http://facebook.github.io/immutable-js), which provides a variety of data structures, including `List` (like array) and `Map` (like object).
 
 Consider the above `specialArray` example but using `Immutable.List`:
 
 ```js
-var state = Immutable.List.of( 1, 2, 3, 4 );
+var state = Immutable.List.of( 4, 6, 1, 1 );
 
-var newState = state.set( 42, "meaning of life" );
+var newState = state.set( 4, 2 );
 
-state === newState;					// false
+state === newState;                 // false
 
-state.get( 2 );						// 3
-state.get( 42 );					// undefined
+state.get( 2 );                     // 1
+state.get( 4 );                     // undefined
 
-newState.get( 2 );					// 3
-newState.get( 42 );					// "meaning of life"
+newState.get( 2 );                  // 1
+newState.get( 4 );                  // 2
 
-newState.toArray().slice( 1, 3 );	// [2,3]
+newState.toArray().slice( 2, 5 );   // [1,1,2]
 ```
 
-A powerful library like Immutable.js employs very sophisticated performance optimizations. Handling all the details and corner-cases manually without such a library would be quite difficult.
+A powerful library like Immutable.js employs sophisticated performance optimizations. Handling all the details and corner-cases manually without such a library would be quite difficult.
 
 When changes to a value are few or infrequent and performance is less of a concern, I'd recommend the lighter-weight solution, sticking with built-in `Object.freeze(..)` as discussed earlier.
 
@@ -376,9 +400,9 @@ Recall this example from earlier:
 
 ```js
 function updateLastLogin(user) {
-	var newUserRecord = Object.assign( {}, user );
-	newUserRecord.lastLogin = Date.now();
-	return newUserRecord;
+    var newUserRecord = Object.assign( {}, user );
+    newUserRecord.lastLogin = Date.now();
+    return newUserRecord;
 }
 ```
 
@@ -386,8 +410,8 @@ This implementation treats `user` as a value that should not be mutated; whether
 
 ```js
 function updateLastLogin(user) {
-	user.lastLogin = Date.now();
-	return user;
+    user.lastLogin = Date.now();
+    return user;
 }
 ```
 
@@ -402,13 +426,13 @@ var arr = [1,2,3,4,5];
 
 var arr2 = arr.concat( 6 );
 
-arr;					// [1,2,3,4,5]
-arr2;					// [1,2,3,4,5,6]
+arr;                    // [1,2,3,4,5]
+arr2;                   // [1,2,3,4,5,6]
 
 var arr3 = arr2.slice( 1 );
 
-arr2;					// [1,2,3,4,5,6]
-arr3;					// [2,3,4,5,6]
+arr2;                   // [1,2,3,4,5,6]
+arr3;                   // [2,3,4,5,6]
 ```
 
 Other array prototype methods that treat the value instance as immutable and return a new array instead of mutating: `map(..)` and `filter(..)`. The `reduce(..)` / `reduceRight(..)` utilities also avoid mutating the instance, though they also don't by default return a new array.
@@ -416,6 +440,51 @@ Other array prototype methods that treat the value instance as immutable and ret
 Unfortunately, for historical reasons, quite a few other array methods are impure mutators of their instance: `splice(..)`, `pop(..)`, `push(..)`, `shift(..)`, `unshift(..)`, `reverse(..)`, `sort(..)`, and `fill(..)`.
 
 It should not be seen as *forbidden* to use these kinds utilities, as some claim. For reasons such as performance optimization, sometimes you will want to use them. But you should never use such a method on an array value that is not already local to the function you're working in, to avoid creating a side effect on some other remote part of the code.
+
+Recall one of the implementations of `compose(..)` from Chapter 4:
+
+```js
+function compose(...fns) {
+    return function composed(result){
+        // copy the array of functions
+        var list = fns.slice();
+
+        while (list.length > 0) {
+            // take the last function off the end of the list
+            // and execute it
+            result = list.pop()( result );
+        }
+
+        return result;
+    };
+}
+```
+
+The `...fns` gather parameter is making a new local array from the passed in arguments, so it's not an array that we could create an outside side effect on. It would be reasonable then to assume that it's safe for us to mutate it locally. But the subtle gotcha here is that the inner `composed(..)` which closes over `fns` is not "local" in this sense.
+
+Consider this different version which doesn't make a copy:
+
+```js
+function compose(...fns) {
+    return function composed(result){
+        while (fns.length > 0) {
+            // take the last function off the end of the list
+            // and execute it
+            result = fns.pop()( result );
+        }
+
+        return result;
+    };
+}
+
+var f = compose( x => x / 3, x => x + 1, x => x * 2 );
+
+f( 4 );     // 3
+
+f( 4 );     // 4 <-- uh oh!
+```
+
+The second usage of `f(..)` here wasn't correct, since we mutated that `fns` during the first call, which affected any subsequent uses. Depending on the circumstances, making a copy of an array like `list = fns.slice()` may or may not be necessary. But I think it's safest to assume you need it -- even if only for readability sake! -- unless you can prove you don't, rather than the other way around.
 
 Be disciplined and always treat *received values* as immutable, whether they are or not. That effort will improve the readability and trustability of your code.
 
@@ -425,6 +494,6 @@ Value immutability is not about unchanging values. It's about creating and track
 
 `const` declarations (constants) are commonly mistaken for their ability to signal intent and enforce immutability. In reality, `const` has basically nothing to do with value immutability, and its usage will likely create more confusion than it solves. Instead, `Object.freeze(..)` provides a nice built-in way of setting shallow value immutability on an array or object. In many cases, this will be sufficient.
 
-For performance sensitive parts of the program, or in cases where changes happen frequently, creating a new array or object (especially if it contains lots of data) is undesirable, for both processsing and memory concerns. In these cases, using immutable data structures from a library like **Immutable.js** is probably the best idea.
+For performance sensitive parts of the program, or in cases where changes happen frequently, creating a new array or object (especially if it contains lots of data) is undesirable, for both processing and memory concerns. In these cases, using immutable data structures from a library like **Immutable.js** is probably the best idea.
 
 The importance of value immutability on code readability is less in the inability to change a value, and more in the discipline to treat a value as immutable.

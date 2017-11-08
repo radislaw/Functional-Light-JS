@@ -19,7 +19,7 @@ Let's expand the list of FP libraries to be aware of, from Chapter 1. We won't c
 * [Mori](https://github.com/swannodette/mori): (ClojureScript Inspired) Immutable Data Structures
 * [Seamless-Immutable](https://github.com/rtfeldman/seamless-immutable): Immutable Data Helpers
 * [tranducers-js](https://github.com/cognitect-labs/transducers-js): Transducers
-* [monet.js](https://github.com/cwmyers/monet.js): Monadic Types
+* [monet.js](https://github.com/monet/monet.js): Monadic Types
 
 There are dozens of other fine libraries not on this list. Just because it's not on my list here doesn't mean it's not good, nor is this list a particular endorsement. It's just a quick glance at the landscape of FP-in-JavaScript. A much longer list of FP resources can be [found here](https://github.com/stoeffel/awesome-fp-js).
 
@@ -43,11 +43,11 @@ The final example of Chapter 3 -- recall defining a point-free `printIf(..)` uti
 
 ```js
 function output(msg) {
-	console.log( msg );
+    console.log( msg );
 }
 
 function isShortEnough(str) {
-	return str.length <= 5;
+    return str.length <= 5;
 }
 
 var isLongEnough = R.complement( isShortEnough );
@@ -57,11 +57,11 @@ var printIf = R.partial( R.flip( R.when ), [output] );
 var msg1 = "Hello";
 var msg2 = msg1 + " World";
 
-printIf( isShortEnough, msg1 );			// Hello
+printIf( isShortEnough, msg1 );            // Hello
 printIf( isShortEnough, msg2 );
 
 printIf( isLongEnough, msg1 );
-printIf( isLongEnough, msg2 );			// Hello World
+printIf( isLongEnough, msg2 );            // Hello World
 ```
 
 A few differences to point out compared to Chapter 3's approach:
@@ -80,7 +80,7 @@ Ramda is a very popular and powerful library. It's a really good place to start 
 
 Lodash is one of the most popular libraries in the entire JS ecosystem. They publish an "FP friendly" version of their API as ["lodash/fp"](https://github.com/lodash/lodash/wiki/FP-Guide).
 
-In Chapter 8, we looked at composing standalone list operations (`map(..)`, `filter(..)`, and `reduce(..)`). Here's how we could do it with "lodash/fp":
+In Chapter 9, we looked at composing standalone list operations (`map(..)`, `filter(..)`, and `reduce(..)`). Here's how we could do it with "lodash/fp":
 
 ```js
 var sum = (x,y) => x + y;
@@ -88,11 +88,11 @@ var double = x => x * 2;
 var isOdd = x => x % 2 == 1;
 
 fp.compose( [
-	fp.reduce( sum )( 0 ),
-	fp.map( double ),
-	fp.filter( isOdd )
+    fp.reduce( sum )( 0 ),
+    fp.map( double ),
+    fp.filter( isOdd )
 ] )
-( [1,2,3,4,5] );					// 18
+( [1,2,3,4,5] );                    // 18
 ```
 
 Instead of the more familiar `_.` namespace prefix, "lodash/fp" defines its methods with `fp.` as the namespace prefix. I find that a helpful distinguisher, and also generally more easy on my eyes than `_.` anyway!
@@ -111,20 +111,20 @@ Let's instead look at another popular library: [Mori](https://github.com/swannod
 var state = mori.vector( 1, 2, 3, 4 );
 
 var newState = mori.assoc(
-	mori.into( state, Array.from( {length: 39} ) ),
-	42,
-	"meaning of life"
+    mori.into( state, Array.from( {length: 39} ) ),
+    42,
+    "meaning of life"
 );
 
-state === newState;						// false
+state === newState;                        // false
 
-mori.get( state, 2 );					// 3
-mori.get( state, 42 );					// undefined
+mori.get( state, 2 );                    // 3
+mori.get( state, 42 );                    // undefined
 
-mori.get( newState, 2 );				// 3
-mori.get( newState, 42 );				// "meaning of life"
+mori.get( newState, 2 );                // 3
+mori.get( newState, 42 );                // "meaning of life"
 
-mori.toJs( newState ).slice( 1, 3 );	// [2,3]
+mori.toJs( newState ).slice( 1, 3 );    // [2,3]
 ```
 
 Some interesting things to point out about Mori for this example:
@@ -139,10 +139,174 @@ Mori is heavily inspired by ClojureScript. Its API will be very familiar if you 
 
 But I really like the standalone function design instead of methods on values. Mori also has some functions that automatically return regular JS arrays, which is a nice convenience.
 
+## Bonus: FPO
+
+In Chapter 2, we introduced a pattern for dealing with arguments called "named arguments", which in JS means using an object at the call-site to map properties to destructured function parameters:
+
+```js
+function foo( {x,y} = {} ) {
+    console.log( x, y );
+}
+
+foo( {
+    y: 3
+} );                    // undefined 3
+```
+
+Then in Chapter 3, we talked about extending our ideas of currying and partial application to work with named arguments, like this:
+
+```js
+function foo({ x, y, z } = {}) {
+    console.log( `x:${x} y:${y} z:${z}` );
+}
+
+var f1 = curryProps( foo, 3 );
+
+f1( {y: 2} )( {x: 1} )( {z: 3} );
+```
+
+One major benefit of this style is being able to pass arguments (even with currying or partial application!) in any order without needing to do `reverseArgs(..)`-style juggling of parameters. Another is being able to omit an optional argument by simply not specifying it, instead of passing an ugly placeholder.
+
+In my journey learning FP, I've regularly been frustrated by both of those irritations of functions with traditional positional arguments; thus I've really appreciated the named arguments style for addressing those concerns.
+
+One day, I was musing about with this style of FP coding, and wondered what it would be like if a whole FP library had all its API methods exposed in this style. I started experimenting, showed those experiments to a few FP folks, and got some positive feedback.
+
+From those experiments, eventually the FPO (pronounced "eff-poh") library (https://github.com/getify/fpo) was born; FPO stands for FP-with-Objects, in case you were wondering.
+
+From the documentation:
+
+```js
+// Ramda's `reduce(..)`
+R.reduce(
+    (acc,v) => acc + v,
+    0,
+    [3,7,9]
+);  // 19
+
+// FPO named-argument method style
+FPO.reduce({
+    arr: [3,7,9],
+    fn: ({acc,v}) => acc + v
+}); // 19
+```
+
+With traditional library implementations of `reduce(..)` (like Ramda), the initial value parameter is in the middle, and not optional. FPO's `reduce(..)` method can take the arguments in any order, and you can omit the optional initial value if desired.
+
+As with most other FP libraries, FPO's API methods are automatically loose-curried, so you can not only provide arguments in any order, but specialize the function by providing its arguments over multiple calls:
+
+```js
+var f = FPO.reduce({ arr: [3,7,9] });
+
+// later
+
+f({ fn: ({acc,v}) => acc + v });    // 19
+```
+
+Lastly, all of FPO's API methods are also exposed using the traditional positional arguments style -- you'll find they're all very similar to Ramda and other libraries -- under the `FPO.std.*` namespace:
+
+```js
+FPO.std.reduce(
+    (acc,v) => acc + v,
+    undefined,
+    [3,7,9]
+);  // 19
+```
+
+If FPO's named argument form of FP appeals to you, perhaps check out the library and see what you think. It has a full test suite and most of the major FP functionality you'd expect, including everything we covered in this text to get you up and going with Functional-Light JavaScript!
+
+## Bonus #2: fasy
+
+FP iterations (`map(..)`, `filter(..)`, etc) are almost always modeled as synchronous operations, meaning we eagerly run through all the steps of the iteration immediately. As a matter of fact, other FP patterns like composition and even transducing are also iterations, and are also modeled exactly this way.
+
+But what happens if one or more of the steps in an iteration needs to complete asynchronously? You might jump to thinking that Observables (see Chapter 10) is the natural answer, but they're not what we need.
+
+Let me quickly illustrate.
+
+Imagine you have a list of URLs that represent images you want to load into a web page. The fetching of the images is asynchronous, obviously. So, this isn't going to work quite like you'd hope:
+
+```js
+var imageURLs = [
+    "https://some.tld/image1.png",
+    "https://other.tld/image2.png",
+    "https://various.tld/image3.png"
+];
+
+var images = imageURLs.map( fetchImage );
+```
+
+The `images` array won't contain the images. Depending on the behavior of `fetchImage(..)`, it probably returns a promise for the image object once it finishes downloading. So `images` would now be a list of promises.
+
+Of course, you could then use `Promise.all(..)` to wait for all those promises to resolve, and then unwrap an array of the image object results at its completion:
+
+```js
+Promise.all( images )
+.then(function allImages(imgObjs){
+    // ..
+});
+```
+
+Unfortunately, this "trick" only works if you're going to do all the asynchronous steps concurrently (rather than serially, one after the other), and only if the operation is a `map(..)` call as shown. If you want serial asynchrony, or you want to, for example, do a `filter(..)` concurrently, this won't quite work; it's possible, but it's messier.
+
+And some operations naturally require serial asynchrony, like for example an asynchronous `reduce(..)`, which clearly needs to work left-to-right one at a time; those steps can't be run concurrently and have that operation make any sense.
+
+As I said, Observables (see Chapter 10) aren't the answer to these kinds of tasks. The reason is, an Observable's coordination of asynchrony is between separate operations, not between steps/iterations in at a single level of operation.
+
+Another way to visualize this distinction is that Observables support "vertical asynchrony", whereas what I'm talking about would be "horizontal asynchrony".
+
+Consider:
+
+```js
+var obsv = Rx.Observable.from( [1,2,3,4,5] );
+
+obsv
+.map( x => x * 2 )
+.delay( 100 )        // <-- vertical asynchrony
+.map( x => x + 1 )
+.subscribe( v => console.log );
+// {after 100 ms}
+// 3
+// 5
+// 7
+// 9
+// 11
+```
+
+If for some reason I wanted to ensure that there was a delay of 100ms between when `1` was processed by the first `map(..)` and when `2` was processed, that would be the "horizontal asynchrony" I'm referring to. There's not really a clean way to model that.
+
+And of course, I'm using an arbitrary delay in that description, but in practice that would more likely be serial-asynchrony like an asynchronous reduce, where each step in that reduction iteration could take some time before it completes and lets the next step be processed.
+
+So, how do we support both serial and concurrent iteration across asynchronous operations?
+
+**fasy** (pronounced like "Tracy" but with an "f") is a little utility library I built for supporting exactly those kinds of tasks. You can find more information about it here: https://github.com/getify/fasy
+
+To illustrate **fasy**, let's consider a concurrent `map(..)` versus a serial `map(..)`:
+
+```js
+FA.concurrent.map( fetchImage, imageURLs )
+.then( function allImages(imgObjs){
+    // ..
+} );
+
+FA.serial.map( fetchImage, imageURLs )
+.then( function allImages(imgObjs){
+    // ..
+} );
+```
+
+In both cases, the `then(..)` handler will only be invoked once all the fetches have fully completed. The difference is whether the fetches will all initiate concurrently (aka, "in parallel") or go out one at a time.
+
+Your instinct might be that concurrent would always be preferable, and while that may be common, it's not always the case.
+
+For example, what if `fetchImage(..)` maintains a cache of fetched images, and it checks the cache before making the actual network request? What if also, the list of `imageURLs` could have duplicates in it? You'd certainly want the first fetch of an image URL to complete (and populate the cache) before doing the check on the duplicate image URL later in the list.
+
+Again, there will inevitably be cases where whether concurrent or serial asynchrony will be called for. Asynchronous reductions will always be serial, whereas asynchronous mappings may likely tend to be more concurrent but can also need to be serial in some cases. That's why **fasy** supports all these options.
+
+Along with Observables, **fasy** will help you extend more FP patterns and principles to your asynchronous operations.
+
 ## Summary
 
 JavaScript is not particularly designed as an FP language. However, it does have enough of the basics (like function values, closures, etc) for us to make it FP-friendly. And the libraries we've examined here will help you do that.
 
-Armed with the concepts from this book, you're ready to start tackling real world code. Find a good FP library and jump in. Practice, practice, practice!
+Armed with the concepts from this book, you're ready to start tackling real world code. Find a good, comfortable FP library and jump in. Practice, practice, practice!
 
-So... that's it. I've shared what I have for you, for now. I hereby officially certify you as a "Functional-Light JavaScript" programmer! It's time to close out this "chapter" of our story of learning FP together. But my learning journey continues; I hope your's does, too!
+So... that's it. I've shared what I have for you, for now. I hereby officially certify you as a "Functional-Light JavaScript" programmer! It's time to close out this "chapter" of our story of learning FP together. But my learning journey still continues; I hope your's does, too!
