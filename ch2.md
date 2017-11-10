@@ -1,14 +1,14 @@
 # Functional-Light JavaScript
 # Chapter 2: The Nature Of Functions
 
-Функциональное программирование - это не просто **программирование с помощью ключевого слова `function`.** О, если бы это было так просто, я мог бы закончить книгу прямо здесь! Но главное, функция действительно *находится* в центре FP. И именно так мы используем функции, которые делают наш код *функциональным*.
 Functional Programming is **not just programming with the `function` keyword.** Oh if only it was that easy, I could end the book right here! Nevertheless, functions really *are* at the center of FP. And it's how we use functions that makes our code *functional*.
+Функциональное программирование - это не просто **программирование с помощью ключевого слова `function`.** О, если бы это было так просто, я мог бы закончить книгу прямо здесь! Но главное, функция действительно *находится* в центре FP. И именно так мы используем функции, которые делают наш код *функциональным*.
 
-Но насколько вы уверены, что знаете, что означает *функция*?
 But, how sure are you that you know what *function* really means?
+Но насколько вы уверены, что знаете, что означает *функция*?
 
-В этой главе мы собираемся подготовить основу для остальной части книги, охватывая все основополагающие аспекты функций. В некотором смысле, написанное здесь - это обзор всего, что программист, не использующий FP, должен знать о функциях. Но если мы хотим получить максимальную отдачу от обучения концепциям FP, мы должны *знать* функции вдоль и поперек.
 In this chapter, we're going to lay the groundwork for the rest of the book by exploring all the foundational aspects of functions. Actually, this is a review of all the things even a non-FP programmer should know about functions. But certainly if we want to get the most out of FP concepts, it's essential we *know* functions inside and out.
+В этой главе мы собираемся подготовить основу для остальной части книги, охватывая все основополагающие аспекты функций. В некотором смысле, написанное здесь - это обзор всего, что программист, не использующий FP, должен знать о функциях. Но если мы хотим получить максимальную отдачу от обучения концепциям FP, мы должны *знать* функции вдоль и поперек.
 
 Соберитесь, потому что функция - это гораздо большее, чем вы могли себе представить.
 
@@ -18,6 +18,7 @@ On its surface, the question, "What is a function?", seems to have an obvious an
 
 Наиболее естественное место, которое я могу придумать, для начала занятиями функциональным программированием, - это *функция*. Это может показаться слишком упрощенным и очевидным, но я думаю, что нашему путешествию нужен прочный первый шаг.
 While this definition is reasonable, it's missing some very important essence that is the core of a *function* as it applies to FP. So let's dig below the surface to understand functions more completely.
+Наиболее естественное место, которое я могу придумать, для начала занятиями функциональным программированием, - это *функция*. Это может показаться слишком упрощенным и очевидным, но я думаю, что нашему путешествию нужен прочный первый шаг.
 
 Итак ... что такое функция?
 
@@ -569,8 +570,8 @@ var f = foo();
 f( "Hello!" );          // HELLO!
 ```
 
-`return` Это не единственный способ «вывести» другую функцию:
 `return` is not the only way to "output" an inner function:
+`return` Это не единственный способ «вывести» другую функцию:
 
 ```js
 function foo() {
@@ -592,8 +593,8 @@ foo();                  // HELLO!
 
 Одна из самых сильных вещей во всем программировании, и особенно в FP, - это то, как ведет себя функция, когда она находится внутри области видимости другой функции. Когда внутренняя функция ссылается на переменную из внешней функции, она называется замыканием.
 
-На практике, замыкание - это когда функция запоминает и получает доступ к переменным из-за пределов своей области видимости, даже когда эта функция выполняется в другой области видимости.
 Defined pragmatically:
+На практике, замыкание - это когда функция запоминает и получает доступ к переменным из-за пределов своей области видимости, даже когда эта функция выполняется в другой области видимости.
 
 > Closure is when a function remembers and accesses variables from outside of its own scope, even when that function is executed in a different scope.
 
@@ -928,9 +929,9 @@ I think most FPers are going to wave off the concerns I'm sharing. They love ano
 
 But even if you're still fuzzy on *this*, the good news is we're going to conclude that you shouldn't be using `this` if you're trying to do FP.
 
-Если вы не знакомы с правилами привязки `this` в JavaScript, я рекомендую вам ознакомиться с моей книгой "You Don't Know JS: this & Object Prototypes". Для целей этого раздела я предполагаю, что вы знаете, как `this` определяется для вызова функции (одно из четырех правил). Но даже если вы все еще нечеткие *this*, хорошая новость заключается в том, что мы собираемся сделать вывод, что вы не должны использовать `this`, если вы пытаетесь заняться FP.
-
 **Note:** We're tackling a topic that we'll ultimately conclude we shouldn't use. So.. why!? Because the topic of `this` has implications for other topics covered later in this book. For example, our notions of function purity are impacted by `this` being essentially an implicit input to a function (see Chapter 5). Additionally, our perspective on `this` affects whether we choose array methods (`arr.map(..)`) versus standalone utilities (`map(..,arr)`) (see Chapter 9). Understanding `this` is essential to understanding why `this` really should *not* be part of your FP!
+
+Если вы не знакомы с правилами привязки `this` в JavaScript, я рекомендую вам ознакомиться с моей книгой "You Don't Know JS: this & Object Prototypes". Для целей этого раздела я предполагаю, что вы знаете, как `this` определяется для вызова функции (одно из четырех правил). Но даже если вы все еще нечеткие *this*, хорошая новость заключается в том, что мы собираемся сделать вывод, что вы не должны использовать `this`, если вы пытаетесь заняться FP.
 
 JavaScript `function`s have a `this` keyword that's automatically bound per function call. The `this` keyword can be described in many different ways, but I prefer to say it provides an object context for the function to run against.
 
