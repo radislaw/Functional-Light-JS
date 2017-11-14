@@ -1,19 +1,26 @@
 # Functional-Light JavaScript
-# Chapter 1: Why Functional Programming?
+# Глава 1: Почему функциональное программирование?
 
-> Functional programmer: (noun) One who names variables "x", names functions "f", and names code patterns "zygohistomorphic prepromorphism"
+> Функциональный программист: (существительное) Тот, кто называет переменные «х», называет функции «f», а также называет образцы кода «зигогистоморфный препоморфизм»
 >
 > James Iry ‏@jamesiry 5/13/15
 >
 > https://twitter.com/jamesiry/status/598547781515485184
 
-Functional Programming (FP) is not a new concept by any means. It's been around almost the entire history of programming. However -- and I'm not sure it's fair to say, but! -- it sure hasn't seemed like as mainstream of a concept in the overall developer world until perhaps the last few years. I think FP has more been the realm of academics.
+Функциональное программирование (ФП) не является новой концепцией. Оно существовало почти всю историю программирования. Однако - и я не уверен, что это справедливо сказано, но! - оно, конечно, не оказался основной темой концепции в общем мире разработчиков, до последних нескольких лет. However -- and I'm not sure it's fair to say, but! -- it sure hasn't seemed like as mainstream of a concept in the overall developer world until perhaps the last few years. Я думаю, что ФП больше относится к академической области.
+
+
+Но все меняется. Интерес к ФП растет, не только на уровне языков, но даже библиотек и фреймворков. Вы очень хорошо читаете этот текст, потому что вы наконец поняли, что ФП - это то, что вы больше не можете игнорировать. Или, может быть, вы похожи на меня, и пытались много раз изучить ФП, но изо всех сил пытались пробраться через все термины или математические обозначения.
 
 But that's all changing. A groundswell of interest is growing around FP, not just at the languages level but even in libraries and frameworks. You very well might be reading this text because you've finally realized FP is something you can't ignore any longer. Or maybe you're like me and you've tried to learn FP many times before but struggled to wade through all the terms or mathematical notation.
+
+Цель первой главы - заложить основу для ответа на такие вопросы, как: «Почему я должен использовать стиль FP в моём коде?» и «Как функционально-Light JavaScript сравнивается с тем, что другие говорят о FP?» Начиная с главы 2 в остальной части книги, мы начнем раскрывать, по частям, методы и образцы написания JS в стиле функционального света.
 
 This first chapter's purpose is to lay the groundwork to answer questions like: "Why should I use FP style with my code?" and "How does Functional-Light JavaScript compare to what others say about FP?" Starting with Chapter 2 throughout the rest of the book, we'll begin uncovering, piece by piece, the techniques and patterns of writing JS in functional-light style.
 
 ## At A Glance
+
+Давайте вкратце проиллюстрируем понятие «Функционально-Light JavaScript» с моментальным снимком кода до и после. Рассматривать:
 
 Let's briefly illustrate the notion of "Functional-Light JavaScript" with a before-and-after snapshot of code. Consider:
 
@@ -24,7 +31,7 @@ var magicNumber = 0;
 
 pickFavoriteNumbers();
 calculateMagicNumber();
-outputMsg();                // The magic number is: 42
+outputMsg();                // Магическое число: 42
 
 // ***************
 
@@ -43,11 +50,12 @@ function pickFavoriteNumbers() {
 }
 
 function outputMsg() {
-    var msg = `The magic number is: ${magicNumber}`;
+    var msg = `Магическое число: ${magicNumber}`;
     console.log( msg );
 }
 ```
 
+Теперь рассмотрим совсем другой стиль, который выполняет точно такой же результат:
 Now consider a very different style that accomplishes exactly the same outcome:
 
 ```js
@@ -64,19 +72,19 @@ var printMagicNumber = FP.pipe( [
 
 var numbers = [4,10,0,27,42,17,15,-6,58];
 
-printMagicNumber( numbers );        // The magic number is: 42
+printMagicNumber( numbers );        // Магическое число: 42
 
 // ***************
 
 function sum(x,y) { return x + y; }
-function constructMsg(v) { return `The magic number is: ${v}`; }
+function constructMsg(v) { return `Магическое число: ${v}`; }
 ```
-
+Как только вы поймете FP и Functional-Light, это, скорее всего, так, как вы бы *читали* и мысленно обрабатывали этот второй фрагмент:
 Once you understand FP and Functional-Light, this is likely how you'd *read* and mentally process that second snippet:
 
-> We're first creating a function called `sumOnlyFavorites(..)` that's a combination of three other functions. We combine two filters, one checking if a value is greater-than-or-equal to 10 and one for less-than-or-equal to 20. Then we include the `sum(..)` reducer in the transducer composition. The resulting `sumOnlyFavorites(..)` function is a reducer that checks if a value passes both filters, and if so, adds the value to an accumulator value.
+> Сначала мы создаем функцию `sumOnlyFavorites (..)`, которая представляет собой комбинацию из трех других функций. Мы объединяем два фильтра, один проверяет, больше или равно значение 10, а другой - меньше или равно 20. Затем мы включаем редуктор `sum (..)` в состав преобразователя. Then we include the `sum(..)` reducer in the transducer composition. Полученная функция `sumOnlyFavorites (..)` является редуктором, который проверяет, проходит ли значение оба фильтра, и если да, добавляет значение к значению аккумулятора.
 >
-> Then we make another function called `printMagicNumber(..)` which first reduces a list of numbers using that `sumOnlyFavorites(..)` reducer we just defined, resulting in a sum of only numbers that passed the *favorite* checks. Then `printMagicNumber(..)` pipes that final sum into `constructMsg(..)`, which creates a string value that finally goes into `console.log(..)`.
+> Затем мы создаем еще одну функцию `printMagicNumber (..)`, которая сначала сводит список чисел, используя редуктор `sumOnlyFavorites (..)`, который мы только что определили, в результате получим сумму только чисел, которые передавали *любимые* проверки. Затем `printMagicNumber (..)` передает окончательную сумму в `constructMsg (..)`, которая создает строковое значение, которое, наконец, переходит в `console.log (..)`. Then we make another function called `printMagicNumber(..)` which first reduces a list of numbers using that `sumOnlyFavorites(..)` reducer we just defined, resulting in a sum of only numbers that passed the *favorite* checks.
 
 All those moving pieces *speak* to an FP developer in ways that likely seem highly unfamiliar to you right now. This book will help you *speak* that same kind of reasoning so that it's as readable to you as any other code, if not more so!
 
@@ -239,7 +247,7 @@ The code snippets in this book largely do not rely on libraries. Each operation 
 
 By the way, you'll want to make sure you check the documentation for the library functions you use to make sure you know how they work. There will be a lot of similarities in many of them to the code we build on in this text, but there will undoubtedly be some differences, even between popular libraries.
 
-Here are a few popular FP libraries for JavaScript that are a great place to start your exploration with:
+Вот несколько популярных библиотек ФП для JavaScript, которые являются отличным началом для исследования:
 
 * [Ramda](http://ramdajs.com)
 * [lodash/fp](https://github.com/lodash/lodash/wiki/FP-Guide)
@@ -254,9 +262,10 @@ You may have a variety reasons for starting to read this book, and different exp
 
 Functional programming is about writing code that is based on proven principles so we can gain a level of confidence and trust over the code we write and read. We shouldn't be content to write code that we anxiously *hope* works, and then abruptly breathe a sigh of relief when the test suite passes. We should *know* what it will do before we run it, and we should be absolutely confident that we've communicated all these ideas in our code for the benefit of other readers (including our future selves).
 
+Это сердце функционального JavaScript. Цель в том, чтобы научиться эффективно общаться с нашим кодом, но не задыхаться под горами обозначений или терминологии, чтобы добраться туда.
 This is the heart of Functional-Light JavaScript. The goal is to learn to effectively communicate with our code but not have to suffocate under mountains of notation or terminology to get there.
 
-The journey to learning functional programming starts with deeply understanding the nature of what a function is. That's what we tackle in the next chapter.
+Путь к изучению функционального программирования начинается с глубокого понимания природы функции. Именно это мы рассмотрим в следующей главе.
 
 ----
 
