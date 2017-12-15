@@ -1,8 +1,6 @@
 # Functional-Light JavaScript (книга)
 
-В этой книге рассматриваются основные принципы функционального программирования (ФП), применительно к JavaScript. Но эта книга отличается тем, что мы подходим к этим принципам, не утопая во всей этой тяжелой терминологии. Мы рассмотрим подмножество базовых концепций ФП, которое я называю «Functional-Light Programming» (FLP), и применим его к JavaScript.
-
-**Note:** Despite the word "Light" in the title, I do not consider or recommend this book as a "beginner", "easy", or "intro" book on the topic. This book is rigorous and full of gritty detail; it expects a solid foundation of JS knowledge before diving in. "Light" means limited in scope; instead of being more broad, this book goes much deeper into each topic than you typically find in other FP-JavaScript books.
+В этой книге рассматриваются основные принципы функционального программирования (ФП), применительно к JavaScript. Но эта книга отличается тем, что мы подходим к этим принципам, не утопая в тяжелой терминологии. Мы рассмотрим подмножество базовых концепций ФП, которое я называю «Functional-Light Programming» (FLP), и применим его к JavaScript.
 
 **Примечание:** Несмотря на слово «Light» в названии, я не рассматриваю и не рекомендую эту книгу в качестве «начальной», «легкой» или «вводной» книги по этой теме. Эта книга является строгой и полной мельчайших деталей; Это подразумевает наличие прочной основы знания JS перед погружением в неё. «Light» означает ограниченный по охвату; Вместо того, чтобы быть более широкой, эта книга проникает гораздо глубже в каждую тему, чем вы обычно находите в других книгах по ФП в JavaScript.
 
@@ -22,30 +20,24 @@
 * [Введение](preface.md)
 * [Глава 1: Почему функциональное программирование?](ch1.md)
 * [Глава 2: Природа функций](ch2.md)
-* [Глава 3: Managing Function Inputs](ch3.md)
-* [Глава 4: Composing Functions](ch4.md)
-* [Глава 5: Reducing Side Effects](ch5.md)
-* [Глава 6: Value Immutability](ch6.md)
-* [Глава 7: Closure vs Object](ch7.md)
+* [Глава 3: Управление входными параметрами функций](ch3.md)
+* [Глава 4: Композиция функций](ch4.md)
+* [Глава 5: Уменьшение побочных эффектов](ch5.md)
+* [Глава 6: Иммутабельность значений](ch6.md)
+* [Глава 7: Замыкания против объектов](ch7.md)
 * [Глава 8: Рекурсия](ch8.md)
-* [Глава 9: List Operations](ch9.md)
-* [Глава 10: Functional Async](ch10.md)
-* [Глава 11: Putting It All together](ch11.md)
-* [Приложение A: Transducing](apA.md)
-* [Приложение B: The Humble Monad](apB.md)
-* [Приложение C: FP Libraries](apC.md)
+* [Глава 9: Операции со списками](ch9.md)
+* [Глава 10: Функционаьная асинхронность](ch10.md)
+* [Глава 11: Всё вместе](ch11.md)
+* [Приложение A: Трансдукция](apA.md)
+* [Приложение B: Скромная монада](apB.md)
+* [Приложение C: Библиотеки ФП](apC.md)
 
-## Publishing
-## Издательство
+## Издание книги
 
 Я сам публикую эту книгу, скорее всего, в цифровой форме [на Leanpub](https://leanpub.com/fljs/). Я также попытаюсь выработать вариант для продажи копий печатных книг, но эта часть все еще остается неопределенной.
 
-I'm self-publishing this book, most likely digitally [on Leanpub](https://leanpub.com/fljs/). I'll also be trying to work out an option to sell print book copies, but that part is still uncertain.
-
-Если вы хотите внести финансовый вклад в работу (или любую другую мою работу OSS), кроме покупки книг, у меня есть [patreon] (https://www.patreon.com/getify), что я всегда буду оцените свою щедрость.
-
-
-If you'd like to contribute financially towards the effort (or any of my other OSS work) aside from purchasing the books, I do have a [patreon](https://www.patreon.com/getify) that I would always appreciate your generosity towards.
+Если вы хотите внести финансовый вклад в работу (или любую другую мою работу OSS), кроме покупки книг, у меня есть [patreon](https://www.patreon.com/getify), и я всегда буду ценить вашу щедрость.
 
 <a href="https://www.patreon.com/getify">[![patreon.png](https://s11.postimg.org/axpzguh77/patreon.png)](https://www.patreon.com/getify)</a>
 
@@ -61,14 +53,13 @@ If you'd like to contribute financially towards the effort (or any of my other O
 
 Также у меня есть несколько учебных курсов по JS, доступных в формате видео по запросу. Я преподаю курсы на [Frontend Masters](https://FrontendMasters.com), такие как семинар [Functional-Lite JS](https://frontendmasters.com/courses/functional-js-lite/). Некоторые из этих курсов также доступны на сайте [PluralSight](https://www.pluralsight.com/search?q=kyle%20simpson&categories=all).
 
+## Сотрудничество
 ## Contributions
 
-Любые вклады, которые вы делаете для этих усилий **, конечно, очень ценятся **.
+Любые вклады, которые вы делаете для этих усилий, **конечно, очень ценятся**.
 Any contributions you make to this effort **are of course greatly appreciated**.
 
-Но **ПОЖАЛУЙСТА** внимательно прочитайте [Рекомендации по взносам] (CONTRIBUTING.md) перед подачей PR.
-
-But **PLEASE** read the [Contributions Guidelines](CONTRIBUTING.md) carefully before submitting a PR.
+Но **ПОЖАЛУЙСТА** внимательно прочитайте [Рекомендации по сотрудничетсву](CONTRIBUTING.md) перед подачей PR.
 
 ## Лицензия и авторские права
 
